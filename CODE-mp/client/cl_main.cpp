@@ -40,6 +40,8 @@ cvar_t	*cl_showSend;
 cvar_t	*cl_timedemo;
 cvar_t	*cl_avidemo;
 cvar_t	*cl_forceavidemo;
+cvar_t  *mme_blurFrames;
+cvar_t  *mme_skipFrames;
 
 cvar_t	*cl_freelook;
 cvar_t	*cl_sensitivity;
@@ -2104,6 +2106,8 @@ extern void SP_CheckForLanguageUpdates(void);
 void CL_Frame ( int msec ) {
 	static double Overf;
 	double f;
+	int blurFrames;
+	int skipFrames;
 
 	if ( !com_cl_running->integer ) {
 		return;
@@ -2123,14 +2127,19 @@ void CL_Frame ( int msec ) {
 	if ( cl_avidemo->integer && msec) {
 		// save the current screen
 		if ( cls.state == CA_ACTIVE || cl_forceavidemo->integer) {
-			if (cl_avidemo->integer > 0) {
-				Cbuf_ExecuteText( EXEC_NOW, "screenshot silent\n" );
-			} else {
-				Cbuf_ExecuteText( EXEC_NOW, "screenshot_tga silent\n" );
+			blurFrames = Cvar_VariableIntegerValue("mme_blurFrames");
+			skipFrames = Cvar_VariableIntegerValue("mme_skipFrames");
+			if ( blurFrames != 0 && cls.framecount % blurFrames >= skipFrames ) {
+				if (cl_avidemo->integer > 0) {
+					Cbuf_ExecuteText( EXEC_NOW, "screenshot silent\n" );
+				} else {
+					Cbuf_ExecuteText( EXEC_NOW, "screenshot_tga silent\n" );
+				}
 			}
 		}
+
 		// fixed time for next frame'
-		f = ( ((double)1000.0f / (double)cl_avidemo->value) * (double)com_timescale->value );
+		f = abs( ((double)1000.0f / (double)cl_avidemo->value) * (double)com_timescale->value );
 		msec = (int)floor(f);
 		Overf += f - floor(f);
 		if (Overf > 1.0) {
@@ -2504,6 +2513,8 @@ void CL_Init( void ) {
 
 	Cvar_Get( "cl_maxPing", "800", CVAR_ARCHIVE );
 
+	Cvar_Get ("mme_blurFrames", "0", 0);
+	Cvar_Get ("mme_skipFrames", "0", 0);
 
 	// ~ and `, as keys and characters
 	cl_consoleKeys = Cvar_Get( "cl_consoleKeys", "~ ` 0x7e 0x60", CVAR_ARCHIVE);
