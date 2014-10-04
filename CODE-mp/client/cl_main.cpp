@@ -2102,6 +2102,8 @@ static unsigned int frameCount;
 static float avgFrametime=0.0;
 extern void SP_CheckForLanguageUpdates(void);
 void CL_Frame ( int msec ) {
+	static double Overf;
+	double f;
 
 	if ( !com_cl_running->integer ) {
 		return;
@@ -2128,10 +2130,14 @@ void CL_Frame ( int msec ) {
 			}
 		}
 		// fixed time for next frame'
-		msec = (1000 / abs(cl_avidemo->integer)) * com_timescale->value;
-		if (msec == 0) {
-			msec = 1;
+		f = ( ((double)1000.0f / (double)cl_avidemo->value) * (double)com_timescale->value );
+		msec = (int)floor(f);
+		Overf += f - floor(f);
+		if (Overf > 1.0) {
+			msec += (int)floor(Overf);
+			Overf -= floor(Overf);
 		}
+		// Com_Printf("video msec: %lf %d  Overf: %f\n", f, msec, Overf);
 	}
 
 	CL_MakeMonkeyDoLaundry();
