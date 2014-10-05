@@ -1293,7 +1293,7 @@ void S_StartSound(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfxH
 				{
 					// Stop this sound
 					alSourceStop(ch->alSource);
-					alSourcei(ch->alSource, AL_BUFFER, NULL);
+					alSourcei(ch->alSource, AL_BUFFER, 0);
 					ch->bPlaying = false;
 					ch->thesfx = NULL;
 					break;
@@ -1309,7 +1309,7 @@ void S_StartSound(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfxH
 				{
 					// Stop this sound
 					alSourceStop(ch->alSource);
-					alSourcei(ch->alSource, AL_BUFFER, NULL);
+					alSourcei(ch->alSource, AL_BUFFER, 0);
 					ch->bPlaying = false;
 					ch->thesfx = NULL;
 					break;
@@ -2357,7 +2357,7 @@ void S_Update_(void) {
 					nBuffersToAdd = i + 1;
 
 				// Make sure queue is empty first
-				alSourcei(s_channels[source].alSource, AL_BUFFER, NULL);
+				alSourcei(s_channels[source].alSource, AL_BUFFER, 0);
 
 				for (i = 0; i < nBuffersToAdd; i++)
 				{
@@ -2526,7 +2526,7 @@ void UpdateSingleShotSounds()
 							if (state == AL_STOPPED)
 							{
 								// Attach NULL buffer to Source to remove any buffers left in the queue
-								alSourcei(ch->alSource, AL_BUFFER, NULL);
+								alSourcei(ch->alSource, AL_BUFFER, 0);
 								ch->thesfx = NULL;
 								ch->bPlaying = false;
 							}

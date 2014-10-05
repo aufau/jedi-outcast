@@ -573,7 +573,7 @@ struct
 	unsigned int oldaxes;
 	int oldaaxes[MAX_JOYSTICK_AXIS];
 	unsigned int oldhats;
-} stick_state;
+} static stick_state;
 
 
 /*

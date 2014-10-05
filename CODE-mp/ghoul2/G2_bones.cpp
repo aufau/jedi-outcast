@@ -228,6 +228,8 @@ void G2_Generate_Matrix(const model_t *mod, boneInfo_v &blist, int index, const 
 		case POSITIVE_Z:
 			newAngles[1] = angles[1];
 			break;
+		default:
+			break;
 		}
 
 		// determine what axis newAngles pitch should revolve around
@@ -251,6 +253,8 @@ void G2_Generate_Matrix(const model_t *mod, boneInfo_v &blist, int index, const 
 		case POSITIVE_Z:
 			newAngles[0] = angles[1];
 			break;
+		default:
+			break;
 		}
 
 		// determine what axis newAngles Roll should revolve around
@@ -273,6 +277,8 @@ void G2_Generate_Matrix(const model_t *mod, boneInfo_v &blist, int index, const 
 			break;
 		case POSITIVE_Z:
 			newAngles[2] = angles[1] + 180;
+			break;
+		default:
 			break;
 		}
 
@@ -323,6 +329,8 @@ void G2_Generate_Matrix(const model_t *mod, boneInfo_v &blist, int index, const 
 		case POSITIVE_Z:
 			permutation.matrix[2][0] = 1;
 			break;
+		default:
+			break;
 		}
 
 		// determine what axis newAngles pitch should revolve around
@@ -346,6 +354,8 @@ void G2_Generate_Matrix(const model_t *mod, boneInfo_v &blist, int index, const 
 		case POSITIVE_Z:
 			permutation.matrix[2][1] = 1;
 			break;
+		default:
+			break;
 		}
 
 		// determine what axis newAngles Roll should revolve around
@@ -368,6 +378,8 @@ void G2_Generate_Matrix(const model_t *mod, boneInfo_v &blist, int index, const 
 			break;
 		case POSITIVE_Z:
 			permutation.matrix[2][2] = 1;		// works
+			break;
+		default:
 			break;
 		}
 

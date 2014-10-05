@@ -760,7 +760,8 @@ int Com_HexStrToInt( const char *str )
 	// check for hex code
 	if( str[ 0 ] == '0' && str[ 1 ] == 'x' )
 	{
-		int i, n = 0;
+		int n = 0;
+		size_t i;
 
 		for( i = 2; i < strlen( str ); i++ )
 		{
@@ -1009,7 +1010,7 @@ char *Q_CleanStr( char *string ) {
 
 
 void QDECL Com_sprintf( char *dest, int size, const char *fmt, ...) {
-	int		len;
+	size_t		len;
 	va_list		argptr;
 	char	bigbuffer[32000];	// big, but small enough to fit in PPC stack
 
@@ -1021,11 +1022,6 @@ void QDECL Com_sprintf( char *dest, int size, const char *fmt, ...) {
 	}
 	if (len >= size) {
 		Com_Printf ("Com_sprintf: overflow of %i in %i\n", len, size);
-#ifdef	_DEBUG
-		__asm {
-			int 3;
-		}
-#endif
 	}
 	Q_strncpyz (dest, bigbuffer, size );
 }

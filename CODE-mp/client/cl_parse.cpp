@@ -694,6 +694,7 @@ void CL_SP_Print(const word ID, byte *Data) //, char* color)
 		{
 			SCR_FadePic(Text);
 		}
+		*/
 		// RWL - commented out.
 		/*
 		else if (Flags & SP_FLAG_CAPTIONED) 

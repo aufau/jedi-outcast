@@ -761,7 +761,7 @@ static void ParseSurfaceSprites( const char *_text, shaderStage_t *stage )
 	stage->ss.facing = SURFSPRITE_FACING_NORMAL;
 
 	// A vertical parameter that needs a default regardless
-	stage->ss.vertSkew;
+	stage->ss.vertSkew = 0.0;
 
 	// These are effect parameters that need defaults nonetheless.
 	stage->ss.fxDuration = 1000;		// 1 second
@@ -1625,7 +1625,7 @@ static qboolean ParseStage( shaderStage_t *stage, const char **text )
 	}
 
 	// decide which agens we can skip
-	if ( stage->alphaGen == CGEN_IDENTITY ) {
+	if ( stage->alphaGen == AGEN_IDENTITY ) {
 		if ( stage->rgbGen == CGEN_IDENTITY
 			|| stage->rgbGen == CGEN_LIGHTING_DIFFUSE ) {
 			stage->alphaGen = AGEN_SKIP;
@@ -2588,7 +2588,7 @@ static qboolean CollapseMultitexture( void ) {
 			return qfalse;
 		}
 	}
-	if ( stages[0].alphaGen == CGEN_WAVEFORM )
+	if ( stages[0].alphaGen == AGEN_WAVEFORM )
 	{
 		if ( memcmp( &stages[0].alphaWave,
 					 &stages[1].alphaWave,

@@ -285,6 +285,8 @@ static void EmitCommand(ELastCommand command)
 		case LAST_COMMAND_SUB_DI_8:
 			EmitString( "83 EF 08" );	// sub edi, 8
 			break;
+		default:
+			break;
 	}
 	LastCommand = command;
 }

@@ -18,6 +18,7 @@ void (*glimpRenderThread)( void );
 
 void *GLimp_RenderThreadWrapper( void *stub ) {
 	glimpRenderThread();
+	return NULL;
 }
 
 /*

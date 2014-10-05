@@ -2285,9 +2285,6 @@ void CG_AssetCache() {
 }
 
 /*
-
-
-/*
 Ghoul2 Insert Start
 */
 
