@@ -601,7 +601,7 @@ void FS_Rename( const char *from, const char *to );
 
 void FS_Remove( const char *osPath );
 void FS_HomeRemove( const char *homePath );
-
+qboolean FS_IsFifo( const char *filename );
 /*
 ==============================================================
 

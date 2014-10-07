@@ -958,6 +958,28 @@ qboolean FS_FilenameCompare( const char *s1, const char *s2 ) {
 
 /*
 ===========
+FS_IsFifo
+===========
+*/
+qboolean FS_IsFifo( const char *filename ) {
+	char *ospath;
+	struct stat f_stat;
+
+	if ( !fs_searchpaths ) {
+		Com_Error( ERR_FATAL, "Filesystem call made without initialization\n" );
+	}
+
+	ospath = FS_BuildOSPath( fs_homepath->string, fs_gamedir, filename );
+
+	if ( stat(ospath, &f_stat) == -1 ) {
+		return qfalse;
+	}
+
+	return (qboolean)S_ISFIFO(f_stat.st_mode);
+}
+
+/*
+===========
 FS_ShiftedStrStr
 ===========
 */

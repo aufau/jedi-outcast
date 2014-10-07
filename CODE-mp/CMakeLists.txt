@@ -56,6 +56,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	if(NOT CMAKE_BUILD_TYPE)
 		set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -march=native")
 	endif()
+	set_source_files_properties(png/png.cpp PROPERTIES COMPILE_FLAGS "-Wno-multichar")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC)

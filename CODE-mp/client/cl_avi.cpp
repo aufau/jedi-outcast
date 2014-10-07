@@ -44,6 +44,7 @@ typedef struct aviFileData_s
   fileHandle_t  f;
   char          fileName[ MAX_QPATH ];
   int           fileSize;
+  qboolean      fifo;
   int           moviOffset;
   int           moviSize;
 
@@ -359,6 +360,7 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
 
   Q_strncpyz( afd.fileName, fileName, MAX_QPATH );
 
+  afd.fifo = FS_IsFifo( afd.fileName );
   afd.frameRate = cl_aviFrameRate->integer;
   afd.framePeriod = (int)( 1000000.0f / afd.frameRate );
   afd.width = cls.glconfig.vidWidth;
@@ -451,7 +453,7 @@ static qboolean CL_CheckFileSize( int bytesToAdd )
 
   // I assume all the operating systems
   // we target can handle a 2Gb file
-  if( newFileSize > INT_MAX )
+  if( !afd.fifo && newFileSize > INT_MAX )
   {
     // Close the current file...
     CL_CloseAVI( );

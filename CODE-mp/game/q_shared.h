@@ -44,6 +44,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <stdint.h>
+#include <sys/stat.h>
 
 #endif
 
