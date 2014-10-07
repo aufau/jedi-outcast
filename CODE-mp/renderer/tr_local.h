@@ -1760,6 +1760,16 @@ typedef struct {
 	int		numDrawSurfs;
 } drawSurfsCommand_t;
 
+typedef struct {
+	int		commandId;
+	int		width;
+	int		height;
+	byte		*captureBuffer;
+	byte		*encodeBuffer;
+	qboolean	motionJpeg;
+	int		motionJpegQuality;
+} videoFrameCommand_t;
+
 typedef enum {
 	RC_END_OF_LIST,
 	RC_SET_COLOR,
@@ -1768,7 +1778,8 @@ typedef enum {
 	RC_ROTATE_PIC2,
 	RC_DRAW_SURFS,
 	RC_DRAW_BUFFER,
-	RC_SWAP_BUFFERS
+	RC_SWAP_BUFFERS,
+	RC_VIDEOFRAME
 } renderCommand_t;
 
 
@@ -1821,7 +1832,9 @@ void RE_RotatePic2 ( float x, float y, float w, float h,
 					  float s1, float t1, float s2, float t2,float a, qhandle_t hShader );
 void RE_BeginFrame( stereoFrame_t stereoFrame );
 void RE_EndFrame( int *frontEndMsec, int *backEndMsec );
+size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality, int image_width, int image_height, byte *image_buffer, int padding);
 void SaveJPG(char * filename, int quality, int image_width, int image_height, unsigned char *image_buffer);
+void RE_TakeVideoFrame( int width, int height, byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg );
 
 /*
 Ghoul2 Insert Start

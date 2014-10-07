@@ -110,6 +110,7 @@ set(src_main_client
 	client/FxSystem.cpp
 	client/FxTemplate.cpp
 	client/FxUtil.cpp
+	client/cl_avi.cpp
 	client/cl_cgame.cpp
 	client/cl_cin.cpp
 	client/cl_console.cpp

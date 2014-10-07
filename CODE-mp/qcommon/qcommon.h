@@ -599,6 +599,9 @@ qboolean FS_idPak( char *pak, char *base );
 qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring );
 void FS_Rename( const char *from, const char *to );
 
+void FS_Remove( const char *osPath );
+void FS_HomeRemove( const char *homePath );
+
 /*
 ==============================================================
 
@@ -836,6 +839,8 @@ void S_ClearSoundBuffer( void );
 
 void SCR_DebugGraph (float value, int color);	// FIXME: move logging to common?
 
+// AVI files have the start of pixel lines 4 byte-aligned
+#define AVI_LINE_PADDING 4
 
 //
 // server interface
