@@ -376,7 +376,7 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
   // Allocate a bit more space for the capture buffer to account for possible
   // padding at the end of pixel lines, and padding for alignment
   #define MAX_PACK_LEN 16
-  afd.cBuffer = (byte *)Z_Malloc((afd.width * 3 + MAX_PACK_LEN - 1) * afd.height + MAX_PACK_LEN - 1, TAG_GENERAL, qtrue);
+  afd.cBuffer = (byte *)Z_Malloc((afd.width * 4 + MAX_PACK_LEN - 1) * afd.height + MAX_PACK_LEN - 1, TAG_GENERAL, qtrue);
   // raw avi files have pixel lines start on 4-byte boundaries
   afd.eBuffer = (byte *)Z_Malloc(PAD(afd.width * 3, AVI_LINE_PADDING) * afd.height, TAG_GENERAL, qtrue);
 

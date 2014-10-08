@@ -1230,6 +1230,8 @@ extern	cvar_t	*r_showImages;
 extern	cvar_t	*r_debugSort;
 
 extern	cvar_t	*r_printShaders;
+
+extern  cvar_t  *r_aviFetchMode;
 /*
 Ghoul2 Insert Start
 */

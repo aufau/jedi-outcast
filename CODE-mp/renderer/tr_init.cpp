@@ -168,6 +168,7 @@ int		max_polyverts;
 
 cvar_t	*r_modelpoolmegs;
 
+cvar_t  *r_aviFetchMode;
 
 /*
 Ghoul2 Insert Start
@@ -986,6 +987,9 @@ void R_Register( void )
 
 	r_maxpolys = ri.Cvar_Get( "r_maxpolys", va("%d", MAX_POLYS), 0);
 	r_maxpolyverts = ri.Cvar_Get( "r_maxpolyverts", va("%d", MAX_POLYVERTS), 0);
+
+	r_aviFetchMode = ri.Cvar_Get( "r_aviFetchMode", "GL_RGB", CVAR_ARCHIVE );
+
 /*
 Ghoul2 Insert Start
 */

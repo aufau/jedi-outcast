@@ -9,9 +9,14 @@ Features so far:
 
   $ cd .jkii/base/videos
   $ mkfifo video.avi
-  $ ffmpeg -i video.avi -r 60 -c:v libx264 -crf 20 -pix_fmt yuv420p -f mp4 -an -y video.mp4
+  $ ffmpeg -i video.avi -c:v libx264 -crf 20 -pix_fmt yuv420p video.mp4
 
   Then run the game and type:
 
   /cl_aviFramerate 60
   /demo XYZ; video video
+
+  IMPORTANT
+  r_aviFetchMode can assume on of the following values: gl_rgb,
+  gl_bgr, gl_rgba and gl_bgra. Finding correct value for your GPU can
+  yield a huge performance improvement. On my hw it's ~1000% more fps.

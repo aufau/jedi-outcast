@@ -1203,69 +1203,87 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	const videoFrameCommand_t	*cmd;
 	byte				*cBuf;
 	size_t				memcount, linelen;
-	int				padwidth, avipadwidth, padlen, avipadlen;
-	GLint packAlign;
+	int				padwidth, avipadwidth, padlen;
+	int				avipadlen, pixlen;
+	qboolean			captureBufferHasAlpha;
+	qboolean			captureBufferNeedsBGRswap;
+	GLenum				glMode;
+	GLint				packAlign;
 
 	cmd = (const videoFrameCommand_t *)data;
 
+	if (!Q_stricmp("gl_rgba", r_aviFetchMode->string)) {
+		captureBufferHasAlpha = qtrue;
+		captureBufferNeedsBGRswap = qtrue;
+		glMode = GL_RGBA;
+	} else if (!Q_stricmp("gl_rgb", r_aviFetchMode->string)) {
+		captureBufferHasAlpha = qfalse;
+		captureBufferNeedsBGRswap = qtrue;
+		glMode = GL_RGB;
+	} else if (!Q_stricmp("gl_bgr", r_aviFetchMode->string)) {
+		captureBufferHasAlpha = qfalse;
+		captureBufferNeedsBGRswap = qfalse;
+		glMode = GL_BGR;
+	} else if (!Q_stricmp("gl_bgra", r_aviFetchMode->string)) {
+		captureBufferHasAlpha = qtrue;
+		captureBufferNeedsBGRswap = qfalse;
+		glMode = GL_BGRA;
+	} else {
+		Com_Printf("unknown glmode using GL_RGB\n");
+		captureBufferHasAlpha = qfalse;
+		captureBufferNeedsBGRswap = qtrue;
+		glMode = GL_RGB;
+	}
+
+	// Defaults to 4 Some sources claim that 8 is the fastest
 	qglGetIntegerv(GL_PACK_ALIGNMENT, &packAlign);
+	// qglPixelStorei(GL_PACK_ALIGNMENT, packAlign);
 
-	linelen = cmd->width * 3;
+	cBuf = (byte *)PADP(cmd->captureBuffer, packAlign);
 
+	qglReadPixels(0, 0, cmd->width, cmd->height, glMode, GL_UNSIGNED_BYTE, cBuf);
+
+	// Convert captureBuffer to BGR with AVI_LINE_PADDING line padding.
+	pixlen = ( captureBufferHasAlpha ? 4 : 3 );
+	linelen = cmd->width * pixlen;
 	// Alignment stuff for glReadPixels
 	padwidth = PAD(linelen, packAlign);
 	padlen = padwidth - linelen;
 	// AVI line padding
 	avipadwidth = PAD(linelen, AVI_LINE_PADDING);
 	avipadlen = avipadwidth - linelen;
-
-	cBuf = (byte *)PADP(cmd->captureBuffer, packAlign);
-
-	qglReadPixels(0, 0, cmd->width, cmd->height, GL_RGB,
-		GL_UNSIGNED_BYTE, cBuf);
-
 	memcount = padwidth * cmd->height;
 
-	// gamma correct
-	if(glConfig.deviceSupportsGamma)
-		R_GammaCorrect(cBuf, memcount);
+	R_GammaCorrect(cBuf, memcount);
 
-	if(cmd->motionJpeg)
-	{
-		memcount = RE_SaveJPGToBuffer(cmd->encodeBuffer, linelen * cmd->height,
-			cmd->motionJpegQuality,
-			cmd->width, cmd->height, cBuf, padlen);
-		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, memcount);
-	}
-	else
-	{
-		byte *lineend, *memend;
-		byte *srcptr, *destptr;
+	byte *lineend, *memend;
+	byte *srcptr, *destptr;
 
-		srcptr = cBuf;
-		destptr = cmd->encodeBuffer;
-		memend = srcptr + memcount;
+	srcptr = cBuf;
+	destptr = cmd->encodeBuffer;
+	memend = srcptr + memcount;
 
-		// swap R and B and remove line paddings
-		while(srcptr < memend)
-		{
-			lineend = srcptr + linelen;
-			while(srcptr < lineend)
-			{
+	// swap R and B and convert line paddings
+	while(srcptr < memend) {
+		lineend = srcptr + linelen;
+		while(srcptr < lineend) {
+			if( captureBufferNeedsBGRswap ) {
 				*destptr++ = srcptr[2];
 				*destptr++ = srcptr[1];
 				*destptr++ = srcptr[0];
-				srcptr += 3;
+			} else {
+				*destptr++ = srcptr[0];
+				*destptr++ = srcptr[1];
+				*destptr++ = srcptr[2];
 			}
-
-			Com_Memset(destptr, '\0', avipadlen);
-			destptr += avipadlen;
-
-			srcptr += padlen;
+			srcptr += pixlen;
 		}
-
-		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
+		Com_Memset(destptr, '\0', avipadlen);
+		destptr += avipadlen;
+		srcptr += padlen;
 	}
+
+	ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
 
 	return (const void *)(cmd + 1);
 }
