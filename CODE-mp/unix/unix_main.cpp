@@ -350,11 +350,7 @@ void *Sys_LoadDll( const char *name,
 
   getcwd(curpath, sizeof(curpath));
 #if defined __i386__
-#ifndef NDEBUG
-  snprintf (fname, sizeof(fname), "%sx86-debug.so", name); // bk010205 - different DLL name
-#else
   snprintf (fname, sizeof(fname), "%sx86.so", name);
-#endif
 #elif defined(__amd64__) || defined(__x86_64__) 
   snprintf (fname, sizeof(fname), "%samd64.so", name);
 #elif defined __powerpc__   //rcg010207 - PPC support.
