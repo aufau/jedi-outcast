@@ -48,11 +48,11 @@
 
 #endif
 
-#if defined(Q3_VM) || defined(CGAME) || defined(QAGAME) || defined(UI_EXPORTS)
-
+#ifndef min
 #define min(x,y) ((x)<(y)?(x):(y))
+#endif
+#ifndef max
 #define max(x,y) ((x)>(y)?(x):(y))
-
 #endif
 
 #ifdef _WIN32

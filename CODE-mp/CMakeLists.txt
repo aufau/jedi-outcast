@@ -20,9 +20,9 @@ if (cpu STREQUAL "x86_64")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -g -O2")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -g -O3 -mfpmath=sse")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-braces")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+#	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-overflow")
 # 	# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-overflow=5")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result") # fixme!!
@@ -39,10 +39,10 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -Wall -g -O2")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -Wall -g -O3 -mfpmath=sse")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+#	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-overflow")
 #	# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstrict-overflow=5")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result") # fixme!!
@@ -54,7 +54,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og")
 	endif()
 	if(NOT CMAKE_BUILD_TYPE)
-		set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -march=native")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 	endif()
 	set_source_files_properties(png/png.cpp PROPERTIES COMPILE_FLAGS "-Wno-multichar")
 endif()
@@ -253,6 +253,7 @@ set(src_main_renderer
 	renderer/tr_WorldEffects.cpp
 	renderer/tr_animation.cpp
 	renderer/tr_bsp.cpp
+	renderer/tr_capture.cpp
 	renderer/tr_cmds.cpp
 	renderer/tr_curve.cpp
 	renderer/tr_flares.cpp

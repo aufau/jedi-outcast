@@ -8,6 +8,7 @@
 #include "../qcommon/qcommon.h"
 #include "tr_public.h"
 #include "qgl.h"
+#include "tr_capture.h"
 
 #define GL_INDEX_TYPE		GL_UNSIGNED_INT
 typedef unsigned int glIndex_t;
@@ -1232,6 +1233,9 @@ extern	cvar_t	*r_debugSort;
 extern	cvar_t	*r_printShaders;
 
 extern  cvar_t  *r_aviFetchMode;
+extern  cvar_t  *r_blurFrames;
+extern  cvar_t  *r_blurSkipFrames;
+extern  cvar_t  *r_blurType;
 /*
 Ghoul2 Insert Start
 */
@@ -1768,8 +1772,6 @@ typedef struct {
 	int		height;
 	byte		*captureBuffer;
 	byte		*encodeBuffer;
-	qboolean	motionJpeg;
-	int		motionJpegQuality;
 } videoFrameCommand_t;
 
 typedef enum {
@@ -1836,7 +1838,7 @@ void RE_BeginFrame( stereoFrame_t stereoFrame );
 void RE_EndFrame( int *frontEndMsec, int *backEndMsec );
 size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality, int image_width, int image_height, byte *image_buffer, int padding);
 void SaveJPG(char * filename, int quality, int image_width, int image_height, unsigned char *image_buffer);
-void RE_TakeVideoFrame( int width, int height, byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg );
+void RE_TakeVideoFrame( int width, int height, byte *captureBuffer, byte *encodeBuffer);
 
 /*
 Ghoul2 Insert Start
@@ -1855,4 +1857,5 @@ Ghoul2 Insert End
 // tr_surfacesprites
 void RB_DrawSurfaceSprites( shaderStage_t *stage, shaderCommands_t *input);
 #endif
+
 #endif //TR_LOCAL_H

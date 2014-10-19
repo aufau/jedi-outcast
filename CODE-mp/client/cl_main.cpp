@@ -42,8 +42,6 @@ cvar_t	*cl_aviFrameRate;
 cvar_t	*cl_aviMotionJpeg;
 cvar_t	*cl_aviMotionJpegQuality;
 cvar_t	*cl_forceavidemo;
-cvar_t  *mme_blurFrames;
-cvar_t  *mme_skipFrames;
 
 cvar_t	*cl_freelook;
 cvar_t	*cl_sensitivity;
@@ -174,7 +172,8 @@ void CL_Video_f( void )
 				}
 		}
 
-	CL_OpenAVIForWriting( filename );
+	if (re.StartVideoRecording())
+		CL_OpenAVIForWriting(filename);
 }
 
 /*
@@ -184,6 +183,7 @@ CL_StopVideo_f
 */
 void CL_StopVideo_f( void )
 {
+	re.StopVideoRecording();
 	CL_CloseAVI( );
 }
 
@@ -2187,11 +2187,6 @@ static unsigned int frameCount;
 static float avgFrametime=0.0;
 extern void SP_CheckForLanguageUpdates(void);
 void CL_Frame ( int msec ) {
-	static double Overf;
-	double f;
-	int blurFrames;
-	int skipFrames;
-
 	if ( !com_cl_running->integer ) {
 		return;
 	}
@@ -2210,21 +2205,15 @@ void CL_Frame ( int msec ) {
 	if ( CL_VideoRecording() && cl_aviFrameRate->integer && msec) {
 		// save the current screen
 		if ( cls.state == CA_ACTIVE || cl_forceavidemo->integer) {
-			blurFrames = Cvar_VariableIntegerValue("mme_blurFrames");
-			skipFrames = Cvar_VariableIntegerValue("mme_skipFrames");
-			if ( blurFrames == 0 || cls.framecount % blurFrames >= skipFrames ) {
-				CL_TakeVideoFrame();
-			}
+			int blurFrames = Cvar_VariableIntegerValue("r_blurFrames");
+                        float fps = blurFrames * cl_aviFrameRate->value * com_timescale->value;
+			float frameDuration = 1000.0f / fps + clc.aviVideoFrameRemainder;
 
-			// fixed time for next frame'
-			f = abs( ((double)1000.0f / (double)cl_aviFrameRate->value) * (double)com_timescale->value );
-			msec = (int)floor(f);
-			Overf += f - floor(f);
-			if (Overf > 1.0) {
-				msec += (int)floor(Overf);
-				Overf -= floor(Overf);
-			}
-			// Com_Printf("video msec: %lf %d  Overf: %f\n", f, msec, Overf);
+			CL_TakeVideoFrame();
+
+			msec = (int)frameDuration;
+			clc.aviVideoFrameRemainder = frameDuration - msec;
+			// Com_Printf("frameRemainder = %f; msec = %d\n", clc.aviVideoFrameRemainder, msec);
 		}
 	}
 
@@ -2595,9 +2584,6 @@ void CL_Init( void ) {
 	cl_motdString = Cvar_Get( "cl_motdString", "", CVAR_ROM );
 
 	Cvar_Get( "cl_maxPing", "800", CVAR_ARCHIVE );
-
-	Cvar_Get ("mme_blurFrames", "0", 0);
-	Cvar_Get ("mme_skipFrames", "0", 0);
 
 	// ~ and `, as keys and characters
 	cl_consoleKeys = Cvar_Get( "cl_consoleKeys", "~ ` 0x7e 0x60", CVAR_ARCHIVE);

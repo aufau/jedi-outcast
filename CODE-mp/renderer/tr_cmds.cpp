@@ -139,12 +139,16 @@ void R_IssueRenderCommands( qboolean runPerformanceCounters ) {
 
 	// actually start the commands going
 	if ( !r_skipBackEnd->integer ) {
-		// let it start on the new batch
-		if ( !glConfig.smpActive ) {
-			RB_ExecuteRenderCommands( cmdList->cmds );
-		} else {
-			GLimp_WakeRenderer( cmdList );
+		if (shot.frame < shot.blurFrames || shot.frame == 0) {
+			// let it start on the new batch
+			if ( !glConfig.smpActive ) {
+				RB_ExecuteRenderCommands( cmdList->cmds );
+			} else {
+				GLimp_WakeRenderer( cmdList );
+			}
 		}
+		if (shot.blurFrames && shot.recording)
+			++shot.frame %= shot.blurFrames + shot.blurSkipFrames;
 	}
 }
 
@@ -485,8 +489,7 @@ void RE_EndFrame( int *frontEndMsec, int *backEndMsec ) {
 RE_TakeVideoFrame
 =============
 */
-void RE_TakeVideoFrame( int width, int height,
-			byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg )
+void RE_TakeVideoFrame( int width, int height, byte *captureBuffer, byte *encodeBuffer )
 {
 	videoFrameCommand_t	*cmd;
 
@@ -505,5 +508,4 @@ void RE_TakeVideoFrame( int width, int height,
 	cmd->height = height;
 	cmd->captureBuffer = captureBuffer;
 	cmd->encodeBuffer = encodeBuffer;
-	cmd->motionJpeg = motionJpeg;
 }

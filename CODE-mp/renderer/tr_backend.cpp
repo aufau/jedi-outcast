@@ -1192,7 +1192,6 @@ const void	*RB_SwapBuffers( const void *data ) {
 	return (const void *)(cmd + 1);
 }
 
-
 /*
 ==================
 RB_TakeVideoFrameCmd
@@ -1205,89 +1204,77 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	size_t				memcount, linelen;
 	int				padwidth, avipadwidth, padlen;
 	int				avipadlen, pixlen;
-	qboolean			captureBufferHasAlpha;
-	qboolean			captureBufferNeedsBGRswap;
-	GLenum				glMode;
 	GLint				packAlign;
 
 	cmd = (const videoFrameCommand_t *)data;
 
-	if (!Q_stricmp("gl_rgba", r_aviFetchMode->string)) {
-		captureBufferHasAlpha = qtrue;
-		captureBufferNeedsBGRswap = qtrue;
-		glMode = GL_RGBA;
-	} else if (!Q_stricmp("gl_rgb", r_aviFetchMode->string)) {
-		captureBufferHasAlpha = qfalse;
-		captureBufferNeedsBGRswap = qtrue;
-		glMode = GL_RGB;
-	} else if (!Q_stricmp("gl_bgr", r_aviFetchMode->string)) {
-		captureBufferHasAlpha = qfalse;
-		captureBufferNeedsBGRswap = qfalse;
-		glMode = GL_BGR;
-	} else if (!Q_stricmp("gl_bgra", r_aviFetchMode->string)) {
-		captureBufferHasAlpha = qtrue;
-		captureBufferNeedsBGRswap = qfalse;
-		glMode = GL_BGRA;
-	} else {
-		Com_Printf("unknown glmode using GL_RGB\n");
-		captureBufferHasAlpha = qfalse;
-		captureBufferNeedsBGRswap = qtrue;
-		glMode = GL_RGB;
-	}
-
-	// Defaults to 4 Some sources claim that 8 is the fastest
 	qglGetIntegerv(GL_PACK_ALIGNMENT, &packAlign);
-	// qglPixelStorei(GL_PACK_ALIGNMENT, packAlign);
-
-	cBuf = (byte *)PADP(cmd->captureBuffer, packAlign);
-
-	qglReadPixels(0, 0, cmd->width, cmd->height, glMode, GL_UNSIGNED_BYTE, cBuf);
-
 	// Convert captureBuffer to BGR with AVI_LINE_PADDING line padding.
-	pixlen = ( captureBufferHasAlpha ? 4 : 3 );
+	pixlen = 3 + shot.alpha;
 	linelen = cmd->width * pixlen;
 	// Alignment stuff for glReadPixels
 	padwidth = PAD(linelen, packAlign);
 	padlen = padwidth - linelen;
-	// AVI line padding
-	avipadwidth = PAD(linelen, AVI_LINE_PADDING);
-	avipadlen = avipadwidth - linelen;
 	memcount = padwidth * cmd->height;
 
-	R_GammaCorrect(cBuf, memcount);
+	cBuf = (byte *)PADP(cmd->captureBuffer, packAlign);
 
-	byte *lineend, *memend;
-	byte *srcptr, *destptr;
+	qglReadPixels(0, 0, cmd->width, cmd->height, shot.glMode, GL_UNSIGNED_BYTE, cBuf);
 
-	srcptr = cBuf;
-	destptr = cmd->encodeBuffer;
-	memend = srcptr + memcount;
-
-	// swap R and B and convert line paddings
-	while(srcptr < memend) {
-		lineend = srcptr + linelen;
-		while(srcptr < lineend) {
-			if( captureBufferNeedsBGRswap ) {
-				*destptr++ = srcptr[2];
-				*destptr++ = srcptr[1];
-				*destptr++ = srcptr[0];
-			} else {
-				*destptr++ = srcptr[0];
-				*destptr++ = srcptr[1];
-				*destptr++ = srcptr[2];
-			}
-			srcptr += pixlen;
+	if (shot.blurFrames) {
+		if (shot.frame == 0) {
+			R_AccumLoad(cBuf, memcount, shot.accum, shot.mult[0]);
+		} else if (shot.frame < shot.blurFrames) { // We skip frames in R_IssueRenderCommands
+			R_Accum(cBuf, memcount, shot.accum, shot.mult[shot.frame]);
 		}
-		Com_Memset(destptr, '\0', avipadlen);
-		destptr += avipadlen;
-		srcptr += padlen;
+
+		if (shot.frame == shot.blurFrames - 1) {
+			R_AccumReturn(shot.accum, memcount, cBuf);
+		}
 	}
 
-	ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
+	if (shot.frame == shot.blurFrames - 1 || !shot.blurFrames) {
+		R_GammaCorrect(cBuf, memcount);
+
+		byte *lineend, *memend;
+		byte *srcptr, *destptr;
+
+		// AVI line padding
+		avipadwidth = PAD(linelen, AVI_LINE_PADDING);
+		avipadlen = avipadwidth - linelen;
+
+		srcptr = cBuf;
+		destptr = cmd->encodeBuffer;
+		memend = srcptr + memcount;
+
+		// swap R and B and convert line paddings
+		// This really needs a proper rewrite for auto-vectorization
+		while(srcptr < memend) {
+			lineend = srcptr + linelen;
+			while(srcptr < lineend) {
+				// Doesn't hurt thanks to branch prediction
+				if( shot.swap ) {
+					*destptr++ = srcptr[2];
+					*destptr++ = srcptr[1];
+					*destptr++ = srcptr[0];
+				} else {
+					*destptr++ = srcptr[0];
+					*destptr++ = srcptr[1];
+					*destptr++ = srcptr[2];
+				}
+				srcptr += pixlen;
+			}
+			Com_Memset(destptr, '\0', avipadlen);
+			destptr += avipadlen;
+			srcptr += padlen;
+		}
+
+		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
+	}
+	shot.recording = qtrue; // FIXME: Move to RE_StartVideoRecording
 
 	return (const void *)(cmd + 1);
 }
-
 
 /*
 ====================

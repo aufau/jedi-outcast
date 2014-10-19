@@ -169,7 +169,9 @@ int		max_polyverts;
 cvar_t	*r_modelpoolmegs;
 
 cvar_t  *r_aviFetchMode;
-
+cvar_t  *r_blurFrames;
+cvar_t  *r_blurSkipFrames;
+cvar_t  *r_blurType;
 /*
 Ghoul2 Insert Start
 */
@@ -988,8 +990,10 @@ void R_Register( void )
 	r_maxpolys = ri.Cvar_Get( "r_maxpolys", va("%d", MAX_POLYS), 0);
 	r_maxpolyverts = ri.Cvar_Get( "r_maxpolyverts", va("%d", MAX_POLYVERTS), 0);
 
-	r_aviFetchMode = ri.Cvar_Get( "r_aviFetchMode", "GL_RGB", CVAR_ARCHIVE );
-
+	r_aviFetchMode = ri.Cvar_Get("r_aviFetchMode", "GL_BGRA", CVAR_ARCHIVE);
+	r_blurFrames = ri.Cvar_Get("r_blurFrames", "0", CVAR_ARCHIVE);
+	r_blurSkipFrames = ri.Cvar_Get("r_blurSkipFrames", "0", CVAR_ARCHIVE);
+	r_blurType = ri.Cvar_Get("r_blurType", "uniform", CVAR_ARCHIVE);
 /*
 Ghoul2 Insert Start
 */
@@ -1310,6 +1314,8 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.GetBModelVerts = RE_GetBModelVerts;
 
 	re.TakeVideoFrame = RE_TakeVideoFrame;
+	re.StartVideoRecording = RE_StartVideoRecording;
+	re.StopVideoRecording = RE_StopVideoRecording;
 #endif //!DEDICATED
 	return &re;
 }

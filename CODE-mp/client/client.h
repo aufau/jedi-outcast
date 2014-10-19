@@ -199,6 +199,7 @@ typedef struct {
 	int			timeDemoStart;		// cls.realtime before first frame
 	int			timeDemoBaseTime;	// each frame will be at this time + frameNum * 50
 
+	float			aviVideoFrameRemainder;
 	// big stuff at end of structure so most offsets are 15 bits or less
 	netchan_t	netchan;
 } clientConnection_t;

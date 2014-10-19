@@ -366,10 +366,12 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
   afd.width = cls.glconfig.vidWidth;
   afd.height = cls.glconfig.vidHeight;
 
+  /*
   if( cl_aviMotionJpeg->integer ) {
     afd.motionJpeg = qtrue;
     afd.motionJpegQuality = cl_aviMotionJpegQuality->integer;
-  } else
+    } else
+  */
     afd.motionJpeg = qfalse;
 
   // Buffers only need to store RGB pixels.
@@ -405,7 +407,7 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
   {
     if( afd.a.bits != 16 || afd.a.channels != 2 )
     {
-      Com_Printf( S_COLOR_YELLOW "WARNING: Audio format of %d bit/%d channels not supported",
+      Com_Printf( S_COLOR_YELLOW "WARNING: Audio format of %d bit/%d channels not supported\n",
           afd.a.bits, afd.a.channels );
       afd.audio = qfalse;
     }
@@ -591,8 +593,7 @@ void CL_TakeVideoFrame( void )
   if( !afd.fileOpen )
     return;
 
-  re.TakeVideoFrame( afd.width, afd.height,
-      afd.cBuffer, afd.eBuffer, afd.motionJpeg );
+  re.TakeVideoFrame(afd.width, afd.height, afd.cBuffer, afd.eBuffer);
 }
 
 /*

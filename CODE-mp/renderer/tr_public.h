@@ -96,7 +96,9 @@ typedef struct {
 
 	void	(*GetBModelVerts)( int bmodelIndex, vec3_t *vec, vec3_t normal );
 
-	void (*TakeVideoFrame)( int h, int w, byte* captureBuffer, byte *encodeBuffer, qboolean motionJpeg );
+	void (*TakeVideoFrame)(int width, int height, byte *captureBuffer, byte *encodeBuffer);
+	qboolean (*StartVideoRecording)(void);
+	void (*StopVideoRecording)(void);
 } refexport_t;
 
 //
