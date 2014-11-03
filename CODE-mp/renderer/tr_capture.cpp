@@ -2,22 +2,118 @@
 
 shotData_t	shot;
 
-qboolean RE_StartVideoRecording(void)
+/*
+**  Calculate the normalized error function with sigma parameter
+*/
+double myerf( double x, double sigma )
 {
-	int	i, bufferSize;
-	double	mu, sigma, f;
+	double f = sqrt(2) * sigma;
+	return 0.5 * erff(x / f);
+}
+
+qboolean initBlurPattern( void )
+{
+	int	i;
+	int	cutoff;
+
+	if (!Q_stricmp("best", r_blurQuality->string)) {
+		shot.blurQuality = 1.0;
+	} else if (!Q_stricmp("high", r_blurQuality->string)) {
+		shot.blurQuality = 0.95;
+	} else if (!Q_stricmp("medium", r_blurQuality->string)) {
+		shot.blurQuality = 0.86;
+	} else if (!Q_stricmp("low", r_blurQuality->string)) {
+		shot.blurQuality = 0.68;
+	} else if (r_blurQuality->integer <= 0 || r_blurQuality->integer > 100) {
+		ri.Printf(PRINT_WARNING,
+			  "r_blurQuality can be set to low, medium, high, best or a number in the 1..100 range.\n");
+		return qfalse;
+	} else {
+		shot.blurQuality = r_blurQuality->integer * 0.01;
+	}
+
+	// Both gaussian and triangular blur types are approximating
+	// the continuous "reality".
+	if (!Q_stricmp("gaussian", r_blurType->string)) {
+		double	sigma;
+		double	mu;
+
+		// Use the 3 sigma rule
+		sigma = shot.blurFrames / 6.0;
+		// These steps are just approximations.
+		// We'd need an inverse error function for arbitrary blurQuality.
+		if (shot.blurQuality >= 0.99)		// 3 sigma
+			cutoff = 0;
+		else if (shot.blurQuality >= 0.95)	// 2 sigma
+			cutoff = shot.blurFrames / 3;
+		else if (shot.blurQuality >= 0.86)	// 1.5 sigma
+			cutoff = shot.blurFrames / 2;
+		else					// 1 sigma
+			cutoff = shot.blurFrames * 2 / 3;
+
+		shot.blurFrames -= cutoff;
+		shot.blurOverlap -= cutoff;
+		shot.blurQuality = 2.0 * myerf(shot.blurFrames * 0.5, sigma);
+
+
+		mu = shot.blurFrames / 2.0;
+		for (i = 0; i < shot.blurFrames; i++) {
+			shot.mult[i] = (myerf(i + 1 - mu, sigma) - myerf(i - mu, sigma))
+				/ shot.blurQuality;
+		}
+	} else if (!Q_stricmp("triangular", r_blurType->string)) {
+		double invArea;
+		// Think that frames are in the middle of their respective unit intervals
+		// and the "real" right triangle starts at -0.5 and ends at blurFrames + 0.5
+		// with blurOverlap = 0 they form a perfect saw, see?
+
+		// Guarantee quality greater or equal to shot.blurQuality
+		cutoff = floor(shot.blurFrames * sqrt(1.0 - shot.blurQuality));
+		shot.blurQuality = (double) cutoff / shot.blurFrames;
+		shot.blurQuality = 1.0 - shot.blurQuality * shot.blurQuality;
+		// Reciprocal of the blended area
+		invArea = 4.0 / (shot.blurFrames * shot.blurFrames * shot.blurQuality);
+
+		shot.blurFrames -= cutoff;
+		shot.blurOverlap -= cutoff;
+
+		for (i = 0; i < shot.blurFrames; i++) {
+			double x = 0.5 * cutoff + i + 0.5;
+			if (i < shot.blurFrames - i - 1)
+				shot.mult[i] = x * invArea;
+			else if (i == shot.blurFrames - i - 1)
+				shot.mult[i] = (x - 0.25) * invArea;
+			else
+				shot.mult[i] = (shot.blurFrames + cutoff - x) * invArea;
+		}
+	} else {
+		if (Q_stricmp("uniform", r_blurType->string))
+			ri.Printf(PRINT_ALL, "Unrecognised r_blurType value. Using uniform blur.");
+
+		for (i = 0; i < shot.blurFrames; i++) {
+			shot.mult[i] = 1.0f / shot.blurFrames;
+		}
+	}
+
+	if (shot.blurOverlap > 0) {
+		ri.Printf(PRINT_WARNING, "With current settings r_blurOverlap must be less or equal to %d",
+			  r_blurOverlap->integer - shot.blurOverlap);
+		return qfalse;
+	}
+	return qtrue;
+}
+
+qboolean RE_StartVideoRecording( void )
+{
+	int	bufferSize;
 
 	shot.width = glConfig.vidWidth;
 	shot.height = glConfig.vidHeight;
-	shot.frame = 0;
+	shot.frame = 1;
+	shot.blurOverlap = r_blurOverlap->integer;
 	shot.blurFrames = r_blurFrames->integer;
 	if (shot.blurFrames < 0 || shot.blurFrames > MAX_BLUR_FRAMES) {
 		ri.Printf(PRINT_WARNING, "r_blurFrames must be in the 0..%d range.\n", MAX_BLUR_FRAMES);
-		return qfalse;
-	}
-	shot.blurSkipFrames = r_blurSkipFrames->integer;
-	if (shot.blurSkipFrames >= shot.blurFrames && shot.blurFrames) {
-		ri.Printf(PRINT_WARNING, "r_blurSkipFrames must be less than r_blurFrames\n");
 		return qfalse;
 	}
 
@@ -54,37 +150,16 @@ qboolean RE_StartVideoRecording(void)
 		return qfalse;
 	}
 
-	if (!Q_stricmp("gaussian", r_blurType->string)) {
-		mu = shot.blurFrames / 2.0;
-		// Use the 3 sigma rule (where 3 = 2)
-		// This covers 0.9545 of the area under our normalized gaussian function
-		sigma = shot.blurFrames / 4.0;
-		f = sqrt(2) * sigma;
-		for (i = 0; i < shot.blurFrames; i++) {
-			shot.mult[i] = 0.5*(erf((i+1-mu)/f) - erf((i-mu)/f))
-				/ 0.9545;
-		}
-	} else if (!Q_stricmp("triangular", r_blurType->string)) {
-		sigma = (floor(shot.blurFrames / 2.0) + 1.0) * ceil(shot.blurFrames / 2.0);
-		for (i = 0; i < shot.blurFrames; i++) {
-			shot.mult[i] = min(i+1, shot.blurFrames - i) / sigma;
-		}
-	} else {
-		if (Q_stricmp("uniform", r_blurType->string))
-			ri.Printf(PRINT_ALL, "Unrecognised r_blurType value. Using uniform blur.");
-
-		for (i = 0; i < shot.blurFrames; i++) {
-			shot.mult[i] = 1.0f / shot.blurFrames;
-		}
-	}
+	if (!initBlurPattern())
+		return qfalse;
 
 	return qtrue;
 }
 
-void RE_StopVideoRecording(void)
+void RE_StopVideoRecording( void )
 {
 	ri.Free(shot.accum);
-	shot.frame = 0;
+	shot.frame = 1;
 	shot.recording = qfalse;
 }
 
@@ -92,6 +167,7 @@ void RE_StopVideoRecording(void)
 void R_AccumLoad( const byte *captureBuffer, size_t memcount, float *accumBuffer, float multiplier )
 {
 	int i;
+	shot.accumFrame = 1;
 	multiplier /= 255.0f;
 	for(i = 0; i < memcount; i++) {
 		accumBuffer[i] = multiplier * captureBuffer[i];
@@ -101,6 +177,7 @@ void R_AccumLoad( const byte *captureBuffer, size_t memcount, float *accumBuffer
 void R_Accum( const byte *captureBuffer, size_t memcount, float *accumBuffer, float multiplier )
 {
 	int	i;
+	shot.accumFrame++;
 	multiplier /= 255.0f;
 	for(i = 0; i < memcount; i++) {
 		accumBuffer[i] += multiplier * captureBuffer[i];
@@ -110,6 +187,7 @@ void R_Accum( const byte *captureBuffer, size_t memcount, float *accumBuffer, fl
 void R_AccumReturn( const float *accumBuffer, size_t memcount, byte *returnBuffer )
 {
 	int i;
+	shot.accumFrame = 0;
 	for(i = 0; i < memcount; i++) {
 		returnBuffer[i] = (byte) (accumBuffer[i] * 255.0f);
 	}

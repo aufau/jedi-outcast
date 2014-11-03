@@ -170,8 +170,9 @@ cvar_t	*r_modelpoolmegs;
 
 cvar_t  *r_aviFetchMode;
 cvar_t  *r_blurFrames;
-cvar_t  *r_blurSkipFrames;
+cvar_t  *r_blurOverlap;
 cvar_t  *r_blurType;
+cvar_t  *r_blurQuality;
 /*
 Ghoul2 Insert Start
 */
@@ -992,8 +993,9 @@ void R_Register( void )
 
 	r_aviFetchMode = ri.Cvar_Get("r_aviFetchMode", "GL_BGRA", CVAR_ARCHIVE);
 	r_blurFrames = ri.Cvar_Get("r_blurFrames", "0", CVAR_ARCHIVE);
-	r_blurSkipFrames = ri.Cvar_Get("r_blurSkipFrames", "0", CVAR_ARCHIVE);
+	r_blurOverlap = ri.Cvar_Get("r_blurOverlap", "0", CVAR_ARCHIVE);
 	r_blurType = ri.Cvar_Get("r_blurType", "uniform", CVAR_ARCHIVE);
+	r_blurQuality = ri.Cvar_Get("r_blurQuality", "high", CVAR_ARCHIVE);
 /*
 Ghoul2 Insert Start
 */

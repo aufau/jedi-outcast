@@ -5,13 +5,15 @@
 #define MAX_PACK_LEN 16
 
 typedef struct {
+	double		blurQuality;
 	float		mult[MAX_BLUR_FRAMES];
 	float		*accum;
 	int		frame;
 	int		blurFrames;
-	int		blurSkipFrames;
+	int		blurOverlap;
 	int		width;
 	int		height;
+	int		accumFrame;
 	GLenum		glMode;
 	qboolean	alpha;
 	qboolean	swap;

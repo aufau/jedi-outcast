@@ -1234,8 +1234,9 @@ extern	cvar_t	*r_printShaders;
 
 extern  cvar_t  *r_aviFetchMode;
 extern  cvar_t  *r_blurFrames;
-extern  cvar_t  *r_blurSkipFrames;
+extern  cvar_t  *r_blurOverlap;
 extern  cvar_t  *r_blurType;
+extern  cvar_t  *r_blurQuality;
 /*
 Ghoul2 Insert Start
 */

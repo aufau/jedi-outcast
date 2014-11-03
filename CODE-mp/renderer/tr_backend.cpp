@@ -1222,18 +1222,17 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	qglReadPixels(0, 0, cmd->width, cmd->height, shot.glMode, GL_UNSIGNED_BYTE, cBuf);
 
 	if (shot.blurFrames) {
-		if (shot.frame == 0) {
+		// watch out! we are before buffer swap
+		if (shot.frame == 1)
 			R_AccumLoad(cBuf, memcount, shot.accum, shot.mult[0]);
-		} else if (shot.frame < shot.blurFrames) { // We skip frames in R_IssueRenderCommands
+		else // skip frames in R_IssueRenderCommands
 			R_Accum(cBuf, memcount, shot.accum, shot.mult[shot.frame]);
-		}
 
-		if (shot.frame == shot.blurFrames - 1) {
+		if (shot.frame == 0)
 			R_AccumReturn(shot.accum, memcount, cBuf);
-		}
-	}
+}
 
-	if (shot.frame == shot.blurFrames - 1 || !shot.blurFrames) {
+	if (shot.frame == 0 || !shot.blurFrames) {
 		R_GammaCorrect(cBuf, memcount);
 
 		byte *lineend, *memend;

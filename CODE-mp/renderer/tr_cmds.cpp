@@ -139,7 +139,10 @@ void R_IssueRenderCommands( qboolean runPerformanceCounters ) {
 
 	// actually start the commands going
 	if ( !r_skipBackEnd->integer ) {
-		if (shot.frame < shot.blurFrames || shot.frame == 0) {
+		if (shot.blurFrames && shot.recording)
+			++shot.frame %= shot.blurFrames - shot.blurOverlap;
+
+		if (shot.frame < shot.blurFrames || shot.blurFrames == 0) {
 			// let it start on the new batch
 			if ( !glConfig.smpActive ) {
 				RB_ExecuteRenderCommands( cmdList->cmds );
@@ -147,8 +150,6 @@ void R_IssueRenderCommands( qboolean runPerformanceCounters ) {
 				GLimp_WakeRenderer( cmdList );
 			}
 		}
-		if (shot.blurFrames && shot.recording)
-			++shot.frame %= shot.blurFrames + shot.blurSkipFrames;
 	}
 }
 

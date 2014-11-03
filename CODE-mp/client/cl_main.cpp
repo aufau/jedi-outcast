@@ -2206,6 +2206,11 @@ void CL_Frame ( int msec ) {
 		// save the current screen
 		if ( cls.state == CA_ACTIVE || cl_forceavidemo->integer) {
 			int blurFrames = Cvar_VariableIntegerValue("r_blurFrames");
+			if (blurFrames)
+				blurFrames -= Cvar_VariableIntegerValue("r_blurOverlap");
+			else
+				blurFrames = 1;
+			
                         float fps = blurFrames * cl_aviFrameRate->value * com_timescale->value;
 			float frameDuration = 1000.0f / fps + clc.aviVideoFrameRemainder;
 
@@ -2531,7 +2536,7 @@ void CL_Init( void ) {
 	cl_activeAction = Cvar_Get( "activeAction", "", CVAR_TEMP );
 
 	cl_timedemo = Cvar_Get ("timedemo", "0", 0);
-	cl_aviFrameRate = Cvar_Get ("cl_aviFrameRate", "25", CVAR_ARCHIVE);
+	cl_aviFrameRate = Cvar_Get ("cl_aviFrameRate", "30", CVAR_ARCHIVE);
 	cl_aviMotionJpeg = Cvar_Get ("cl_aviMotionJpeg", "0", CVAR_ARCHIVE | CVAR_ROM);
 	cl_aviMotionJpegQuality = Cvar_Get("cl_aviMotionJpegQuality", "90", CVAR_ARCHIVE);
 	cl_forceavidemo = Cvar_Get ("cl_forceavidemo", "0", 0);
