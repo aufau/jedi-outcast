@@ -382,6 +382,11 @@ typedef int		sfxHandle_t;
 typedef int		fileHandle_t;
 typedef int		clipHandle_t;
 
+#define PAD(base, alignment)    (((base)+(alignment)-1) & ~((alignment)-1))
+#define PADLEN(base, alignment) (PAD((base), (alignment)) - (base))
+
+#define PADP(base, alignment)   ((void *) PAD((intptr_t) (base), (alignment)))
+
 #define G2_COLLISION_ENABLED
 
 #ifndef NULL

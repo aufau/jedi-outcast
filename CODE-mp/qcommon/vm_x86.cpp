@@ -1064,7 +1064,7 @@ This function is called directly by the generated code
 */
 #ifndef DLL_ONLY // bk010215 - for DLL_ONLY dedicated servers/builds w/o VM
 int	VM_CallCompiled( vm_t *vm, int *args ) {
-	int		stack[1024];
+	int		stack[1024 + 15];
 	int		programCounter;
 	int		programStack;
 	int		stackOnEntry;
@@ -1109,9 +1109,9 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 
 	// off we go into generated code...
 	entryPoint = vm->codeBase;
-	opStack = &stack;
+	opStack = PADP(stack, 16);
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 	__asm  {
 		pushad
 		mov		esi, programStack;
@@ -1122,30 +1122,12 @@ int	VM_CallCompiled( vm_t *vm, int *args ) {
 		popad
 	}
 #else
-	{
-		static int memProgramStack;
-		static void *memOpStack;
-		static void *memEntryPoint;
-
-		memProgramStack	= programStack;
-		memOpStack      = opStack;     
-		memEntryPoint   = entryPoint;  
-		
-		__asm__("	pushal				\r\n" \
-				"	movl %0,%%esi		\r\n" \
-				"	movl %1,%%edi		\r\n" \
-				"	call *%2			\r\n" \
-				"	movl %%esi,%0		\r\n" \
-				"	movl %%edi,%1		\r\n" \
-				"	popal				\r\n" \
-				: "=m" (memProgramStack), "=m" (memOpStack) \
-				: "m" (memEntryPoint), "0" (memProgramStack), "1" (memOpStack) \
-				: "si", "di" \
-		);
-
-		programStack = memProgramStack;
-		opStack      = memOpStack;
-	}
+	__asm__ volatile(
+			 "calll *%2\n\t"
+			 : "+S" (programStack), "+D" (opStack)
+			 : "g" (entryPoint)
+			 : "cc", "memory", "%eax", "%ecx", "%edx"
+			 );
 #endif
 
 	if ( opStack != &stack[1] ) {

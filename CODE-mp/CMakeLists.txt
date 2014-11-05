@@ -78,6 +78,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 add_definitions( -D_M_IX86=1 )  # tested to mean little endian...
 add_definitions( -D_JK2 )
+add_definitions( -DDEBUG_VM )
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 	add_definitions( -DFINAL_BUILD )
 	add_definitions( -NDEBUG )
