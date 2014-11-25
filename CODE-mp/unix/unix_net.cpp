@@ -585,8 +585,8 @@ void NET_Sleep(int msec)
 	fd_set	fdset;
 	extern qboolean stdin_active;
 
-	if (!ip_socket || !com_dedicated->integer)
-		return; // we're not a server, just run full speed
+	if (!ip_socket)
+		return;
 
 	FD_ZERO(&fdset);
 	if (stdin_active)

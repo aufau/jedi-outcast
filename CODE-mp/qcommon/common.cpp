@@ -71,6 +71,7 @@ cvar_t	*com_cameraMode;
 #if defined(_WIN32) && defined(_DEBUG)
 cvar_t	*com_noErrorInterrupt;
 #endif
+cvar_t  *com_busyWait;
 
 // com_speeds times
 int		time_game;
@@ -2553,6 +2554,7 @@ void Com_Init( char *commandLine ) {
 		com_sv_running = Cvar_Get ("sv_running", "0", CVAR_ROM);
 		com_cl_running = Cvar_Get ("cl_running", "0", CVAR_ROM);
 		com_buildScript = Cvar_Get( "com_buildScript", "0", 0 );
+		com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
 
 		com_introPlayed = Cvar_Get( "com_introplayed", "0", CVAR_ARCHIVE);
 
@@ -2774,6 +2776,27 @@ int Com_ModifyMsec( int msec ) {
 	return msec;
 }
 
+
+/*
+=================
+Com_TimeVal
+=================
+*/
+
+int Com_TimeVal(int minMsec)
+{
+	int timeVal;
+
+	timeVal = Sys_Milliseconds() - com_frameTime;
+
+	if(timeVal >= minMsec)
+		timeVal = 0;
+	else
+		timeVal = minMsec - timeVal;
+
+	return timeVal;
+}
+
 /*
 =================
 Com_Frame
@@ -2784,7 +2807,8 @@ void Com_Frame( void ) {
 try
 {
 	int		msec, minMsec;
-	static int	lastTime;
+	int		timeVal;
+	static int	lastTime = 0, bias = 0;
 	int key;
  
 	int		timeBeforeFirstEvents;
@@ -2827,19 +2851,35 @@ try
 	// we may want to spin here if things are going too fast
 	if ( !com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer ) {
 		minMsec = 1000 / com_maxfps->integer;
+
+		timeVal = com_frameTime - lastTime;
+		bias += timeVal - minMsec;
+
+		if(bias > minMsec)
+			bias = minMsec;
+
+		// Adjust minMsec if previous frame took too long to render so
+		// that framerate is stable at the requested value.
+		minMsec -= bias;
+
 	} else {
 		minMsec = 1;
 	}
 	do {
-		com_frameTime = Com_EventLoop();
-		if ( lastTime > com_frameTime ) {
-			lastTime = com_frameTime;		// possible on first frame
-		}
-		msec = com_frameTime - lastTime;
-	} while ( msec < minMsec );
-	Cbuf_Execute ();
+		timeVal = Com_TimeVal(minMsec);
+
+		if(com_busyWait->integer || timeVal < 1)
+			NET_Sleep(0);
+		else
+			NET_Sleep(timeVal - 1);
+	} while (Com_TimeVal(minMsec));
 
 	lastTime = com_frameTime;
+	com_frameTime = Com_EventLoop();
+
+	msec = com_frameTime - lastTime;
+
+	Cbuf_Execute ();
 
 	// mess with msec if needed
 	com_frameMsec = msec;
