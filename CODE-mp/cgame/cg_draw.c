@@ -3547,10 +3547,12 @@ static qboolean CG_DrawFollow( void )
 
 //	s = "following";
 	s = CG_GetStripEdString("INGAMETEXT", "FOLLOWING");
-	CG_Text_Paint ( 320 - CG_Text_Width ( s, 1.0f, FONT_MEDIUM ) / 2, 60, 1.0f, colorWhite, s, 0, 0, 0, FONT_MEDIUM );
+//	CG_Text_Paint ( 320 - CG_Text_Width ( s, 1.0f, FONT_MEDIUM ) / 2, 60, 1.0f, colorWhite, s, 0, 0, 0, FONT_MEDIUM );
 
-	s = cgs.clientinfo[ cg.snap->ps.clientNum ].name;
-	CG_Text_Paint ( 320 - CG_Text_Width ( s, 2.0f, FONT_MEDIUM ) / 2, 80, 2.0f, colorWhite, s, 0, 0, 0, FONT_MEDIUM );
+//	s = cgs.clientinfo[ cg.snap->ps.clientNum ].name;
+	strcat( s, va(": %s", cgs.clientinfo[ cg.snap->ps.clientNum ].name));
+//	CG_Text_Paint ( 320 - CG_Text_Width ( s, 2.0f, FONT_MEDIUM ) / 2, 80, 2.0f, colorWhite, s, 0, 0, 0, FONT_MEDIUM );
+	CG_Text_Paint ( 320 - CG_Text_Width ( s, 1.0f, FONT_MEDIUM ) / 2, 1, 1.0f, colorWhite, s, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_LARGE );
 
 	return qtrue;
 }
