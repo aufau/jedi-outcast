@@ -142,25 +142,21 @@ void Sys_Printf (char *fmt, ...)
 }
 
 // bk010104 - added for abstraction
-void Sys_Exit( int ex ) {
+static __attribute__ ((noreturn)) void Sys_Exit( int exitCode ) {
 #ifndef DEDICATED
-  SDL_Quit();
+	SDL_Quit();
 #endif
-#ifdef NDEBUG // regular behavior
-  // We can't do this 
-  //  as long as GL DLL's keep installing with atexit...
-  //exit(ex);
-  _exit(ex);
-#else
-  // Give me a backtrace on error exits.
-  assert( ex == 0 );
-  exit(ex);
+
+	NET_Shutdown();
+
+#ifndef NDEBUG // Give me a backtrace on error exits.
+	assert( exitCode == 0 );
 #endif
+	exit(exitCode);
 }
 
 
 void Sys_Quit (void) {
-  CL_Shutdown ();
   fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
   Sys_Exit(0);
 }
@@ -216,9 +212,6 @@ void Sys_Init(void)
 #endif
 
 	Cvar_Set( "username", Sys_GetCurrentUser() );
-
-//	IN_Init();
-
 }
 
 void	Sys_Error( const char *error, ...)
@@ -239,6 +232,7 @@ void	Sys_Error( const char *error, ...)
     Sys_Exit( 1 ); // bk010104 - use single exit point.
 } 
 
+#if 0
 void Sys_Warn (char *warning, ...)
 { 
     va_list     argptr;
@@ -248,7 +242,8 @@ void Sys_Warn (char *warning, ...)
     vsprintf (string,warning,argptr);
     va_end (argptr);
 	fprintf(stderr, "Warning: %s", string);
-} 
+}
+#endif
 
 /*
 ============
@@ -265,11 +260,6 @@ int	Sys_FileTime (char *path)
 		return -1;
 	
 	return buf.st_mtime;
-}
-
-void floating_point_exception_handler(int whatever)
-{
-	signal(SIGFPE, floating_point_exception_handler);
 }
 
 char *Sys_ConsoleInput(void)
@@ -1098,7 +1088,6 @@ void	Sys_Print( const char *msg )
 {
 	fputs(msg, stderr);
 }
-
 
 void    Sys_ConfigureFPU() { // bk001213 - divide by zero
 #ifdef __linux__

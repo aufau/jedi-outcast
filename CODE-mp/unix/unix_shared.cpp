@@ -69,7 +69,7 @@ void Sys_SnapVector3( float *v ) { // bk001213 - see win32/win_shared.c
 
 void	Sys_Mkdir( const char *path )
 {
-    mkdir (path, 0777);
+    mkdir (path, 0750);
 }
 
 //============================================
@@ -245,10 +245,12 @@ char *Sys_Cwd( void )
 {
 	static char cwd[MAX_OSPATH];
 
-	getcwd( cwd, sizeof( cwd ) - 1 );
-	cwd[MAX_OSPATH-1] = 0;
-
-	return cwd;
+	if (getcwd( cwd, sizeof( cwd ) - 1 )) {
+		cwd[MAX_OSPATH-1] = '\0';
+		return cwd;
+	} else {
+		return NULL;
+	}
 }
 
 void Sys_SetDefaultCDPath(const char *path)
