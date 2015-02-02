@@ -56,17 +56,12 @@ StringToFilter
 */
 static qboolean StringToFilter (char *s, ipFilter_t *f)
 {
-	char	num[128];
+	char		num[128];
 	int		i, j;
-	byte	b[4];
-	byte	m[4];
-	
-	for (i=0 ; i<4 ; i++)
-	{
-		b[i] = 0;
-		m[i] = 0;
-	}
-	
+	byteAlias_t	b, m;
+
+	b.ui = m.ui = 0u;
+
 	for (i=0 ; i<4 ; i++)
 	{
 		if (*s < '0' || *s > '9')
@@ -81,17 +76,17 @@ static qboolean StringToFilter (char *s, ipFilter_t *f)
 			num[j++] = *s++;
 		}
 		num[j] = 0;
-		b[i] = atoi(num);
-		if (b[i] != 0)
-			m[i] = 255;
+		b.b[i] = (byte) atoi(num);
+		if (b.b[i] != 0)
+			m.b[i] = 0xFF;
 
 		if (!*s)
 			break;
 		s++;
 	}
 	
-	f->mask = *(unsigned *)m;
-	f->compare = *(unsigned *)b;
+	f->mask = m.ui;
+	f->compare = b.ui;
 	
 	return qtrue;
 }
@@ -103,9 +98,9 @@ UpdateIPBans
 */
 static void UpdateIPBans (void)
 {
-	byte	b[4];
+	byteAlias_t	b;
 	int		i;
-	char	iplist[MAX_INFO_STRING];
+	char		iplist[MAX_INFO_STRING];
 
 	*iplist = 0;
 	for (i = 0 ; i < numIPFilters ; i++)
@@ -113,9 +108,9 @@ static void UpdateIPBans (void)
 		if (ipFilters[i].compare == 0xffffffff)
 			continue;
 
-		*(unsigned *)b = ipFilters[i].compare;
+		b.ui = ipFilters[i].compare;
 		Com_sprintf( iplist + strlen(iplist), sizeof(iplist) - strlen(iplist), 
-			"%i.%i.%i.%i ", b[0], b[1], b[2], b[3]);
+			"%i.%i.%i.%i ", b.b[0], b.b[1], b.b[2], b.b[3]);
 	}
 
 	trap_Cvar_Set( "g_banIPs", iplist );
@@ -129,16 +124,15 @@ G_FilterPacket
 qboolean G_FilterPacket (char *from)
 {
 	int		i;
-	unsigned	in;
-	byte m[4] = {'\0','\0','\0','\0'};
+	byteAlias_t	m;
 	char *p;
 
+	m.ui = 0u;
 	i = 0;
 	p = from;
 	while (*p && i < 4) {
-		m[i] = 0;
 		while (*p >= '0' && *p <= '9') {
-			m[i] = m[i]*10 + (*p - '0');
+			m.b[i] = m.b[i]*10 + (*p - '0');
 			p++;
 		}
 		if (!*p || *p == ':')
@@ -146,10 +140,8 @@ qboolean G_FilterPacket (char *from)
 		i++, p++;
 	}
 	
-	in = *(unsigned *)m;
-
 	for (i=0 ; i<numIPFilters ; i++)
-		if ( (in & ipFilters[i].mask) == ipFilters[i].compare)
+		if ( (m.ui & ipFilters[i].mask) == ipFilters[i].compare)
 			return g_filterBan.integer != 0;
 
 	return g_filterBan.integer == 0;
