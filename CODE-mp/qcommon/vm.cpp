@@ -130,7 +130,8 @@ int VM_SymbolToValue( vm_t *vm, const char *symbol ) {
 VM_SymbolForCompiledPointer
 =====================
 */
-const char *VM_SymbolForCompiledPointer( vm_t *vm, void *code ) {
+#if 0
+static const char *VM_SymbolForCompiledPointer( vm_t *vm, void *code ) {
 	int			i;
 
 	if ( code < (void *)vm->codeBase ) {
@@ -151,7 +152,7 @@ const char *VM_SymbolForCompiledPointer( vm_t *vm, void *code ) {
 	// now look up the bytecode instruction pointer
 	return VM_ValueToSymbol( vm, i );
 }
-
+#endif
 
 
 /*
@@ -159,7 +160,7 @@ const char *VM_SymbolForCompiledPointer( vm_t *vm, void *code ) {
 ParseHex
 ===============
 */
-int	ParseHex( const char *text ) {
+static int ParseHex( const char *text ) {
 	int		value;
 	int		c;
 
@@ -187,7 +188,7 @@ int	ParseHex( const char *text ) {
 VM_LoadSymbols
 ===============
 */
-void VM_LoadSymbols( vm_t *vm ) {
+static void VM_LoadSymbols( vm_t *vm ) {
 	int		len;
 	char	*mapfile, *token;
 	const	char *text_p;

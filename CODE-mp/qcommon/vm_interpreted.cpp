@@ -105,7 +105,7 @@ static char	*opnames[256] = {
 	#define	loadWord(addr) *((int *)addr)
 #endif
 
-char *VM_Indent( vm_t *vm ) {
+static char *VM_Indent( vm_t *vm ) {
 	static char	*string = "                                        ";
 	if ( vm->callLevel > 20 ) {
 		return string;
@@ -113,7 +113,8 @@ char *VM_Indent( vm_t *vm ) {
 	return string + 2 * ( 20 - vm->callLevel );
 }
 
-void VM_StackTrace( vm_t *vm, int programCounter, int programStack ) {
+#if 0
+static void VM_StackTrace( vm_t *vm, int programCounter, int programStack ) {
 	int		count;
 
 	count = 0;
@@ -124,7 +125,7 @@ void VM_StackTrace( vm_t *vm, int programCounter, int programStack ) {
 	} while ( programCounter != -1 && ++count < 32 );
 
 }
-
+#endif
 
 /*
 ====================

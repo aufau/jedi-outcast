@@ -344,7 +344,7 @@ static void EmitMovEAXEDI(vm_t *vm) {
 	EmitString( "8B 07" );		// mov eax, dword ptr [edi]
 }
 
-qboolean EmitMovEBXEDI(vm_t *vm, int andit) {
+static qboolean EmitMovEBXEDI(vm_t *vm, int andit) {
 	if (LastCommand == LAST_COMMAND_MOV_EDI_EAX) 
 	{	// mov [edi], eax
 		compiledOfs -= 2;
@@ -1081,7 +1081,7 @@ void VM_Compile( vm_t *vm, vmHeader_t *header ) {
 	}
 }
 
-static void VM_Destroy_Compiled( vm_t *self ) {
+void VM_Destroy_Compiled( vm_t *self ) {
 #ifdef VM_X86_MMAP
 	munmap(self->codeBase, self->codeLength);
 #elif _WIN32
