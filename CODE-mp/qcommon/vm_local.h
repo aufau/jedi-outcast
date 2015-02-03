@@ -1,6 +1,13 @@
 #include "../game/q_shared.h"
 #include "qcommon.h"
 
+
+
+// don't change
+// Hardcoded in q3asm and reserved at end of bss
+#define	PROGRAM_STACK_SIZE	0x20000
+#define PROGRAM_STACK_MASK      (PROGRAM_STACK_SIZE-1)
+
 typedef enum {
 	OP_UNDEF, 
 
