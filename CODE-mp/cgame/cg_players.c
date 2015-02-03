@@ -6497,14 +6497,10 @@ doEssentialTwo:
 				cent->grip_arm.customShader = trap_R_RegisterShader( "gfx/misc/red_portashield" );
 				
 				cent->grip_arm.renderfx |= RF_RGB_TINT;
-				cent->grip_arm.shaderRGBA[0] = 255 - (wv*900);
+				cent->grip_arm.shaderRGBA[0] = max(255 - (wv*900), 255);
 				if (cent->grip_arm.shaderRGBA[0] < 30)
 				{
 					cent->grip_arm.shaderRGBA[0] = 30;
-				}
-				if (cent->grip_arm.shaderRGBA[0] > 255)
-				{
-					cent->grip_arm.shaderRGBA[0] = 255;
 				}
 				cent->grip_arm.shaderRGBA[1] = cent->grip_arm.shaderRGBA[2] = cent->grip_arm.shaderRGBA[0];
 				
@@ -7129,10 +7125,6 @@ stillDoSaber:
 				if (legs.shaderRGBA[2] < 1)
 				{
 					legs.shaderRGBA[2] = 1;
-				}
-				if (legs.shaderRGBA[2] > 255)
-				{
-					legs.shaderRGBA[2] = 255;
 				}
 
 				if (subLen <= 1024)
