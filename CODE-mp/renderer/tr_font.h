@@ -45,17 +45,17 @@ public:
 	CFontInfo(int fill) { memset(this, fill, sizeof(*this)); }
 	~CFontInfo(void) {}
 
-	const int GetPointSize(void) const { return(mPointSize); }
-	const int GetHeight(void) const { return(mHeight); }
-	const int GetAscender(void) const { return(mAscender); }
-	const int GetDescender(void) const { return(mDescender); }
+	int GetPointSize(void) const { return(mPointSize); }
+	int GetHeight(void) const { return(mHeight); }
+	int GetAscender(void) const { return(mAscender); }
+	int GetDescender(void) const { return(mDescender); }
 
 	const glyphInfo_t *GetLetter(const unsigned int uiLetter, int *piShader = NULL);
-	const int GetAsianCode(ulong uiLetter) const;
+	int GetAsianCode(ulong uiLetter) const;
 
-	const int GetLetterWidth(const unsigned int uiLetter) const;
-	const int GetLetterHorizAdvance(const unsigned int uiLetter) const;
-	const int GetShader(void) const { return(mShader); }
+	int GetLetterWidth(const unsigned int uiLetter) const;
+	int GetLetterHorizAdvance(const unsigned int uiLetter) const;
+	int GetShader(void) const { return(mShader); }
 
 	void FlagNoAsianGlyphs(void) { m_hAsianShaders[0] = 0; m_iAsianLanguageLoaded = -1; }	// used during constructor
 	bool AsianGlyphsAvailable(void) const { return !!(m_hAsianShaders[0]); }
