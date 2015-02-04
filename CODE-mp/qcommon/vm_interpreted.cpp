@@ -291,7 +291,7 @@ locals from sp
 #define	DEBUGSTR va("%s%i", VM_Indent(vm), opStack-stack )
 
 int	VM_CallInterpreted( vm_t *vm, int *args ) {
-	int		stack[MAX_STACK];
+	int		stack[MAX_STACK + 15];
 	int		*opStack;
 	int		programCounter;
 	int		programStack;
@@ -324,7 +324,8 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	// leave a free spot at start of stack so
 	// that as long as opStack is valid, opStack-1 will
 	// not corrupt anything
-	opStack = stack;
+	opStack = (int *)PADP(stack, 16);
+	*opStack = 0xDEADBEEF;
 	programCounter = 0;
 
 	programStack -= 48;
@@ -460,7 +461,9 @@ nextInstruction2:
 				src = (int *)&image[ r0&dataMask ];
 				dest = (int *)&image[ r1&dataMask ];
 				if ( ( (int)src | (int)dest | count ) & 3 ) {
-					Com_Error( ERR_DROP, "OP_BLOCK_COPY not dword aligned" );
+				  // Original 1.04 jk2mpgame.qvm does this
+				  // Com_Error( ERR_DROP, "OP_BLOCK_COPY not dword aligned" );
+				  Com_Printf(S_COLOR_YELLOW "WARNING: OP_BLOCK_COPY not dword aligned\n");
 				}
 				count >>= 2;
 				for ( i = count-1 ; i>= 0 ; i-- ) {
