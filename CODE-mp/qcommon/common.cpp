@@ -237,15 +237,10 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	static int	errorCount;
 	int			currentTime;
 
-#if defined(_WIN32) && defined(_DEBUG)
-	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
-		if (com_noErrorInterrupt && !com_noErrorInterrupt->integer) {
-			__asm {
-				int 0x03
-			}
-		}
+	if ( com_errorEntered ) {
+		Sys_Error( "recursive error after: %s", com_errorMessage );
 	}
-#endif
+	com_errorEntered = qtrue;
 
 	// when we are running automated scripts, make sure we
 	// know if anything failed
@@ -267,45 +262,52 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	}
 	lastErrorTime = currentTime;
 
-	if ( com_errorEntered ) {
-		Sys_Error( "recursive error after: %s", com_errorMessage );
-	}
-	com_errorEntered = qtrue;
 
 	va_start (argptr,fmt);
 	vsprintf (com_errorMessage,fmt,argptr);
 	va_end (argptr);
 
-	if ( code != ERR_DISCONNECT ) {
+	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
 		Cvar_Get("com_errorMessage", "", CVAR_ROM);	//give com_errorMessage a default so it won't come back to life after a resetDefaults
 		Cvar_Set("com_errorMessage", com_errorMessage);
 	}
 
-	if ( code == ERR_SERVERDISCONNECT ) {
+	if ( code == ERR_DISCONNECT || code == ERR_SERVERDISCONNECT ) {
+		VM_Forced_Unload_Start();
+		SV_Shutdown( "Server disconnected" );
 		CL_Disconnect( qtrue );
 		CL_FlushMemory( );
+		VM_Forced_Unload_Done();
 		com_errorEntered = qfalse;
 		throw ("DISCONNECTED\n");
-	} else if ( code == ERR_DROP || code == ERR_DISCONNECT ) {
+	} else if ( code == ERR_DROP ) {
 		Com_Printf ("********************\nERROR: %s\n********************\n", com_errorMessage);
+		VM_Forced_Unload_Start();
 		SV_Shutdown (va("Server crashed: %s\n",  com_errorMessage));
 		CL_Disconnect( qtrue );
 		CL_FlushMemory( );
+		VM_Forced_Unload_Done();
 		com_errorEntered = qfalse;
 		throw ("DROPPED\n");
 	} else if ( code == ERR_NEED_CD ) {
+		VM_Forced_Unload_Start();
 		SV_Shutdown( "Server didn't have CD\n" );
 		if ( com_cl_running && com_cl_running->integer ) {
 			CL_Disconnect( qtrue );
 			CL_FlushMemory( );
+			VM_Forced_Unload_Done();
 			com_errorEntered = qfalse;
 		} else {
 			Com_Printf("Server didn't have CD\n" );
+			VM_Forced_Unload_Done();
 		}
+		com_errorEntered = qfalse;
 		throw ("NEED CD\n");
 	} else {
+		VM_Forced_Unload_Start();
 		CL_Shutdown ();
 		SV_Shutdown (va("Server fatal crashed: %s\n", com_errorMessage));
+		VM_Forced_Unload_Done();
 	}
 
 	Com_Shutdown ();
@@ -324,9 +326,16 @@ do the apropriate things.
 */
 void Com_Quit_f( void ) {
 	// don't try to shutdown if we are in a recursive error
+        char *p = Cmd_Args( );
 	if ( !com_errorEntered ) {
-		SV_Shutdown ("Server quit\n");
+                // Some VMs might execute "quit" command directly,
+                // which would trigger an unload of active VM error.
+                // Sys_Quit will kill this process anyways, so
+                // a corrupt call stack makes no difference
+                VM_Forced_Unload_Start();
+		SV_Shutdown (p[0] ? p : "Server quit\n");
 		CL_Shutdown ();
+                VM_Forced_Unload_Done();
 		Com_Shutdown ();
 		FS_Shutdown(qtrue);
 	}

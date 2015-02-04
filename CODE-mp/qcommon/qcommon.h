@@ -287,6 +287,8 @@ vm_t	*VM_Create( const char *module, int (*systemCalls)(int *),
 
 void	VM_Free( vm_t *vm );
 void	VM_Clear(void);
+void	VM_Forced_Unload_Start(void);
+void	VM_Forced_Unload_Done(void);
 vm_t	*VM_Restart( vm_t *vm );
 
 int		QDECL VM_Call( vm_t *vm, int callNum, ... );
@@ -295,6 +297,15 @@ void	VM_Debug( int level );
 
 void	*VM_ArgPtr( int intValue );
 void	*VM_ExplicitArgPtr( vm_t *vm, int intValue );
+
+#define VMA(x) VM_ArgPtr(args[x])
+static ID_INLINE float _vmf(int x)
+{
+        byteAlias_t fi;
+        fi.i = x;
+        return fi.f;
+}
+#define VMF(x)  _vmf(args[x])
 
 /*
 ==============================================================
@@ -841,7 +852,7 @@ void SCR_DebugGraph (float value, int color);	// FIXME: move logging to common?
 // server interface
 //
 void SV_Init( void );
-void SV_Shutdown( char *finalmsg );
+void SV_Shutdown( const char *finalmsg );
 void SV_Frame( int msec );
 void SV_PacketEvent( netadr_t from, msg_t *msg );
 qboolean SV_GameCommand( void );

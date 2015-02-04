@@ -1,12 +1,44 @@
+/*
+===========================================================================
+Copyright (C) 1999-2005 Id Software, Inc.
+
+This file is part of Quake III Arena source code.
+
+Quake III Arena source code is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of the License,
+or (at your option) any later version.
+
+Quake III Arena source code is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Quake III Arena source code; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+===========================================================================
+*/
 #include "../game/q_shared.h"
 #include "qcommon.h"
 
+// Max number of arguments to pass from engine to vm's vmMain function.
+// command number + 9 arguments
+#define MAX_VMMAIN_ARGS 10
 
+// Max number of arguments to pass from a vm to engine's syscall handler function for the vm.
+// syscall number + 15 arguments
+#define MAX_VMSYSCALL_ARGS 16
+
+// don't change, this is hardcoded into x86 VMs, opStack protection relies
+// on this
+#define	OPSTACK_SIZE	1024
+#define	OPSTACK_MASK	(OPSTACK_SIZE-1)
 
 // don't change
-// Hardcoded in q3asm and reserved at end of bss
+// Hardcoded in q3asm a reserved at end of bss
 #define	PROGRAM_STACK_SIZE	0x20000
-#define PROGRAM_STACK_MASK      (PROGRAM_STACK_SIZE-1)
+#define	PROGRAM_STACK_MASK	(PROGRAM_STACK_SIZE-1)
 
 typedef enum {
 	OP_UNDEF, 
@@ -113,26 +145,28 @@ struct vm_s {
     // DO NOT MOVE OR CHANGE THESE WITHOUT CHANGING THE VM_OFFSET_* DEFINES
     // USED BY THE ASM CODE
     int			programStack;		// the vm may be recursively entered
-    int			(*systemCall)( int *parms );
+    intptr_t			(*systemCall)( intptr_t *parms );
 
 	//------------------------------------
    
-    char		name[MAX_QPATH];
+	char		name[MAX_QPATH];
+	void	*searchPath;				// hint for FS_ReadFileDir()
 
 	// for dynamic linked modules
 	void		*dllHandle;
-	int		(QDECL *entryPoint)( int callNum, ... );
-	void		(*destroy)( vm_t *self );
+	intptr_t			(QDECL *entryPoint)( int callNum, ... );
+	void (*destroy)(vm_t* self);
 
 	// for interpreted modules
 	qboolean	currentlyInterpreting;
 
 	qboolean	compiled;
 	byte		*codeBase;
+	int			entryOfs;
 	int			codeLength;
 
-	int			*instructionPointers;
-	int			instructionPointersLength;
+	intptr_t	*instructionPointers;
+	int			instructionCount;
 
 	byte		*dataBase;
 	int			dataMask;
@@ -142,9 +176,12 @@ struct vm_s {
 	int			numSymbols;
 	struct vmSymbol_s	*symbols;
 
-	int			callLevel;			// for debug indenting
+	int			callLevel;		// counts recursive VM_Call
 	int			breakFunction;		// increment breakCount on function entry to this
 	int			breakCount;
+
+	byte		*jumpTableTargets;
+	int			numJumpTableTargets;
 };
 
 
@@ -162,3 +199,4 @@ int VM_SymbolToValue( vm_t *vm, const char *symbol );
 const char *VM_ValueToSymbol( vm_t *vm, int value );
 void VM_LogSyscalls( int *args );
 
+void VM_BlockCopy(unsigned int dest, unsigned int src, size_t n);

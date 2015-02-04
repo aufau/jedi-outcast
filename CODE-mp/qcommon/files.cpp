@@ -1201,7 +1201,6 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 	return -1;
 }
 
-
 /*
 =================
 FS_Read

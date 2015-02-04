@@ -492,8 +492,6 @@ CL_CgameSystemCalls
 The cgame module is making a system call
 ====================
 */
-#define	VMA(x) VM_ArgPtr(args[x])
-#define	VMF(x)	((float *)args)[x]
 extern bool RicksCrazyOnServer;
 int CL_CgameSystemCalls( int *args ) {
 	switch( args[0] ) {
