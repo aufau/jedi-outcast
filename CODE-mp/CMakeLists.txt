@@ -426,7 +426,6 @@ set(src_ui_game
 	game/bg_lib.c
 	game/bg_misc.c
 	game/bg_weapons.c
-	game/q_math.c
 )
 
 set(src_ui_ui
@@ -441,6 +440,7 @@ set(src_ui_ui
 add_library(ui${cpu} SHARED
 	${src_ui_game}
 	${src_ui_ui}
+	qcommon/q_math.cpp
 	qcommon/q_shared.cpp
 )
 
@@ -491,7 +491,6 @@ set(src_cgame_game
 	game/bg_saber.c
 	game/bg_slidemove.c
 	game/bg_weapons.c
-	game/q_math.c
 )
 
 set(src_cgame_ui
@@ -502,6 +501,7 @@ add_library(cgame${cpu} SHARED
 	${src_cgame_cgame}
 	${src_cgame_game}
 	${src_cgame_ui}
+	qcommon/q_math.cpp
 	qcommon/q_shared.cpp
 )
 
@@ -543,13 +543,13 @@ set(src_game_game
 	game/g_trigger.c
 	game/g_utils.c
 	game/g_weapon.c
-	game/q_math.c
 	game/w_force.c
 	game/w_saber.c
 )
 
 add_library(jk2mpgame${cpu} SHARED
 	${src_game_game}
+	qcommon/q_math.cpp
 	qcommon/q_shared.cpp
 )
 
