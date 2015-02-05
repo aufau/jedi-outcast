@@ -1,6 +1,6 @@
 #include <pthread.h>
 #include <semaphore.h>
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 
 /*
 ===========================================================

@@ -1,5 +1,5 @@
 #include "matcomp.h"
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>

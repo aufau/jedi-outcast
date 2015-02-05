@@ -11,7 +11,7 @@
 //
 // cg_drawtools.c -- helper functions called by cg_draw, cg_scoreboard, cg_info, etc
 #include "cg_local.h"
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 
 
 /*

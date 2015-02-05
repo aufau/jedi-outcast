@@ -1,4 +1,4 @@
-#include "../game/q_shared.h"
+#include "q_shared.h"
 
 #include "cm_local.h"
 #include "memory.h"

@@ -8,7 +8,7 @@
 
 #define MAX_TEAMNAME 32
 
-#include "../qcommon/disablewarnings.h"
+#include "disablewarnings.h"
 
 /**********************************************************************
   VM Considerations
@@ -28,7 +28,7 @@
 
 #ifdef Q3_VM
 
-#include "bg_lib.h"
+#include "../game/bg_lib.h"
 
 #define assert(exp)     ((void)0)
 
@@ -1299,7 +1299,7 @@ COLLISION DETECTION
 ==============================================================
 */
 
-#include "surfaceflags.h"			// shared with the q3map utility
+#include "../game/surfaceflags.h"			// shared with the q3map utility
 
 // plane types are used to speed some tests
 // 0-2 are axial planes
@@ -2169,7 +2169,7 @@ Ghoul2 Insert End
 //
 #define TAGDEF(blah) TAG_ ## blah
 typedef enum {
-	#include "../qcommon/tags.h"
+	#include "tags.h"
 } memtag_t;
 
 

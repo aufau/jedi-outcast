@@ -4,7 +4,7 @@
 #include <windows.h>
 #include "../smartheap/smrtheap.h"
 #if !defined(__Q_SHARED_H)
-	#include "../game/q_shared.h"
+	#include "../qcommon/q_shared.h"
 #endif
 #if !defined(_QCOMMON_H_)
 	#include "../qcommon/qcommon.h"

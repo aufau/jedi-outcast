@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "../client/client.h"
 #include "qcommon.h"
 #include "unzip.h"
