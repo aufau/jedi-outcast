@@ -69,7 +69,6 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 add_definitions( -D_M_IX86=1 )  # tested to mean little endian...
 add_definitions( -D_JK2 )
 add_definitions( -DUSE_ICON )
-add_definitions( -DQ3_LITTLE_ENDIAN )
 add_definitions( -DFINAL_BUILD )
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 #	add_definitions( -DDEBUG_VM )
@@ -428,7 +427,6 @@ set(src_ui_game
 	game/bg_misc.c
 	game/bg_weapons.c
 	game/q_math.c
-	game/q_shared.c
 )
 
 set(src_ui_ui
@@ -443,6 +441,7 @@ set(src_ui_ui
 add_library(ui${cpu} SHARED
 	${src_ui_game}
 	${src_ui_ui}
+	qcommon/q_shared.cpp
 )
 
 set_target_properties(ui${cpu} PROPERTIES PREFIX "")
@@ -493,7 +492,6 @@ set(src_cgame_game
 	game/bg_slidemove.c
 	game/bg_weapons.c
 	game/q_math.c
-	game/q_shared.c
 )
 
 set(src_cgame_ui
@@ -504,6 +502,7 @@ add_library(cgame${cpu} SHARED
 	${src_cgame_cgame}
 	${src_cgame_game}
 	${src_cgame_ui}
+	qcommon/q_shared.cpp
 )
 
 set_target_properties(cgame${cpu} PROPERTIES PREFIX "")
@@ -545,13 +544,13 @@ set(src_game_game
 	game/g_utils.c
 	game/g_weapon.c
 	game/q_math.c
-	game/q_shared.c
 	game/w_force.c
 	game/w_saber.c
 )
 
 add_library(jk2mpgame${cpu} SHARED
 	${src_game_game}
+	qcommon/q_shared.cpp
 )
 
 set_target_properties(jk2mpgame${cpu} PROPERTIES PREFIX "")
