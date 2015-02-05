@@ -618,6 +618,20 @@ MISC
 ==============================================================
 */
 
+// returned by Sys_GetProcessorFeatures
+typedef int cpuFeatures_t;
+
+#define CF_NONE		0
+#define CF_RDTSC	1 << 0
+#define CF_MMX		1 << 1
+#define CF_MMX_EXT	1 << 2
+#define CF_3DNOW	1 << 3
+#define CF_3DNOW_EXT	1 << 4
+#define CF_SSE		1 << 5
+#define CF_SSE2		1 << 6
+#define CF_ALTIVEC	1 << 7
+
+
 // NOTE NOTE NOTE!!!!!!!!!!!!!
 //
 // Any CPUID_XXXX defined as higher than CPUID_INTEL_MMX *must* have MMX support (eg like CPUID_AMD_3DNOW (0x30) has),
@@ -935,15 +949,10 @@ void	Sys_Print( const char *msg );
 // any game related timing information should come from event timestamps
 int		Sys_Milliseconds (void);
 
-#ifndef _MSVC_VER
-extern "C" void	Sys_SnapVector( float *v );
-
-#else
-void	Sys_SnapVector( float *v );
-#endif
-
 // the system console is shown when a dedicated server is running
 void	Sys_DisplaySystemConsole( qboolean show );
+
+cpuFeatures_t Sys_GetProcessorFeatures( void );
 
 int		Sys_GetProcessorId( void );
 int		Sys_GetCPUSpeed( void );

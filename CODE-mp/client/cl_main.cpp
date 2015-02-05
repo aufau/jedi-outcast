@@ -2368,6 +2368,8 @@ void CL_InitRef( void ) {
 
 	ri.CM_PointContents = CM_PointContents;
 
+	ri.ftol = Q_ftol;
+
 	ret = GetRefAPI( REF_API_VERSION, &ri );
 
 #if defined __USEA3D && defined __A3D_GEOM

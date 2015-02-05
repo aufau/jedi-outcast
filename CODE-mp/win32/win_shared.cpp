@@ -33,40 +33,6 @@ int Sys_Milliseconds (void)
 }
 
 /*
-================
-Sys_SnapVector
-================
-*/
-void Sys_SnapVector( float *v )
-{
-	int i;
-	float f;
-
-	f = *v;
-	__asm	fld		f;
-	__asm	fistp	i;
-	*v = i;
-	v++;
-	f = *v;
-	__asm	fld		f;
-	__asm	fistp	i;
-	*v = i;
-	v++;
-	f = *v;
-	__asm	fld		f;
-	__asm	fistp	i;
-	*v = i;
-	/*
-	*v = myftol(*v);
-	v++;
-	*v = myftol(*v);
-	v++;
-	*v = myftol(*v);
-	*/
-}
-
-
-/*
 **
 ** Disable all optimizations temporarily so this code works correctly!
 **

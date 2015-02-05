@@ -12,14 +12,6 @@
 #define GL_INDEX_TYPE		GL_UNSIGNED_INT
 typedef unsigned int glIndex_t;
 
-// fast float to int conversion
-#if (defined(_MSC_VER) && defined(__i386__))
-long myftol( float f );
-#else
-#define	myftol(x) ((int)(x))
-#endif
-
-
 // everything that is needed by the backend needs
 // to be double buffered to allow it to run in
 // parallel on a dual cpu machine

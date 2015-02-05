@@ -66,26 +66,7 @@ static	int		compiledOfs = 0;
 static	byte	*code = NULL;
 static	int		pc = 0;
 
-//#define FTOL_PTR
-
-#ifdef FTOL_PTR
-#ifdef _WIN32
-int _ftol(float);
-static int Q_VMftol = (int)_ftol;
-#else // _WIN32
-// bk001213 - BEWARE: does not work! UI menu etc. broken - stack!
-// bk001119 - added: int gftol( float x ) { return (int)x; }
-extern "C" {
-int qftol( void );     // bk001213 - label, see unix/ftol.nasm
-int qftol027F( void ); // bk001215 - fixed FPU control variants
-int qftol037F( void );
-int qftol0E7F( void ); // bk010102 - fixed bogus bits (duh)
-int qftol0F7F( void );
-}
-
-static int (QDECL *Q_VMftol)(void) = qftol0F7F;
-#endif // !_WIN32
-#endif // FTOL_PTR
+#define FTOL_PTR
 
 static	int	instruction, pass;
 static	int	lastConst = 0;

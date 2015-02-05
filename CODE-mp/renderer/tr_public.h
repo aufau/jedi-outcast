@@ -157,6 +157,8 @@ typedef struct {
 
 	int (*CM_PointContents)( const vec3_t p, clipHandle_t model );
 
+	// math
+	long	(*ftol)(float f);
 } refimport_t;
 
 

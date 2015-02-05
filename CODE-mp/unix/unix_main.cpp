@@ -35,6 +35,7 @@
 #ifndef DEDICATED
 #	include <SDL.h>
 #endif
+#include <SDL_cpuinfo.h>
 
 cvar_t *nostdout;
 
@@ -159,6 +160,25 @@ static __attribute__ ((noreturn)) void Sys_Exit( int exitCode ) {
 void Sys_Quit (void) {
   fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
   Sys_Exit(0);
+}
+
+/*
+=================
+Sys_GetProcessorFeatures
+=================
+*/
+cpuFeatures_t Sys_GetProcessorFeatures( void )
+{
+	cpuFeatures_t features = CF_NONE;
+
+#ifndef DEDICATED
+	if( SDL_HasRDTSC( ) )    features |= CF_RDTSC;
+	if( SDL_HasMMX( ) )      features |= CF_MMX;
+	if( SDL_HasSSE( ) )      features |= CF_SSE;
+	if( SDL_HasSSE2( ) )     features |= CF_SSE2;
+#endif
+
+	return features;
 }
 
 void Sys_Init(void)

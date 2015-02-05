@@ -3,7 +3,7 @@
 #include "tr_local.h"
 
 
-#define	WAVEVALUE( table, base, amplitude, phase, freq )  ((base) + table[ myftol( ( ( (phase) + tess.shaderTime * (freq) ) * FUNCTABLE_SIZE ) ) & FUNCTABLE_MASK ] * (amplitude))
+#define	WAVEVALUE( table, base, amplitude, phase, freq )  ((base) + table[ ri.ftol( ( ( (phase) + tess.shaderTime * (freq) ) * FUNCTABLE_SIZE ) ) & FUNCTABLE_MASK ] * (amplitude))
 
 static float *TableForFunc( genFunc_t func ) 
 {
@@ -726,7 +726,7 @@ void RB_CalcWaveColor( const waveForm_t *wf, unsigned char *dstColors )
 		glow = 1;
 	}
 
-	v = myftol( 255 * glow );
+	v = ri.ftol( 255 * glow );
 	color[0] = color[1] = color[2] = v;
 	color[3] = 255;
 	v = *(int *)color;
@@ -1046,23 +1046,6 @@ void RB_CalcRotateTexCoords( float degsPerSecond, float *st )
 	RB_CalcTransformTexCoords( &tmi, st );
 }
 
-
-
-
-
-
-#if (defined(_MSVC_VER) && (defined __i386__))
-#pragma warning (disable: 4035)//no return value
-long myftol( float f ) {
-	static int tmp;
-	__asm fld f
-	__asm fistp tmp
-	__asm mov eax, tmp
-}
-#pragma warning (default: 4035)
-
-#endif
-
 /*
 ** RB_CalcSpecularAlpha
 **
@@ -1158,19 +1141,19 @@ void RB_CalcDiffuseColor( unsigned char *colors )
 			*(int *)&colors[i*4] = ambientLightInt;
 			continue;
 		} 
-		j = myftol( ambientLight[0] + incoming * directedLight[0] );
+		j = ri.ftol( ambientLight[0] + incoming * directedLight[0] );
 		if ( j > 255 ) {
 			j = 255;
 		}
 		colors[i*4+0] = j;
 
-		j = myftol( ambientLight[1] + incoming * directedLight[1] );
+		j = ri.ftol( ambientLight[1] + incoming * directedLight[1] );
 		if ( j > 255 ) {
 			j = 255;
 		}
 		colors[i*4+1] = j;
 
-		j = myftol( ambientLight[2] + incoming * directedLight[2] );
+		j = ri.ftol( ambientLight[2] + incoming * directedLight[2] );
 		if ( j > 255 ) {
 			j = 255;
 		}

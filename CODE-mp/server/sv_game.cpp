@@ -441,7 +441,7 @@ int SV_GameSystemCalls( int *args ) {
 	case G_REAL_TIME:
 		return Com_RealTime( (struct qtime_s *)VMA(1) );
 	case G_SNAPVECTOR:
-		Sys_SnapVector( (float *)VMA(1) );
+		Q_SnapVector( (float *)VMA(1) );
 		return 0;
 
 	case SP_REGISTER_SERVER_CMD:
