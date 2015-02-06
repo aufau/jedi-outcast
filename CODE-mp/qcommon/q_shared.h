@@ -106,6 +106,12 @@ typedef const char *LPCSTR;
 
 typedef enum {qfalse, qtrue}	qboolean;
 
+typedef union {
+	float f;
+	int i;
+	unsigned int ui;
+} floatint_t;
+
 #if defined (_MSC_VER) && (_MSC_VER >= 1600)
 
         #include <stdint.h>
@@ -137,15 +143,6 @@ typedef enum {qfalse, qtrue}	qboolean;
 	// #define Q_vsnprintf vsnprintf
 
 #endif
-
-typedef union byteAlias_u {
-        float f;
-        int32_t i;
-        uint32_t ui;
-        qboolean qb;
-        byte b[4];
-        char c[4];
-} byteAlias_t;
 
 typedef int		qhandle_t;
 typedef int		fxHandle_t;

@@ -29,8 +29,8 @@ Dependencies
 * OpenGL
 * OpenAL
 
-Compiling
----------
+Compilation
+-----------
 
 In the repo's main directory::
 
@@ -38,13 +38,13 @@ In the repo's main directory::
    cmake ../CODE-mp/
    make
 
-Installing
+Installation
 ----------
 
-Copy jk2mp and base/ to the directory containing game files.
+Copy ``jk2mp`` and ``base/`` to the directory containing game files (only ``base/assets[0125].pk3`` are necessary).
 
-~/.jkii is the directory where all configs, screenshots, logs and
-demos will be stored. You can also put pk3s and executables there.
+``~/.jkii`` is the directory where all the configs, screenshots, logs
+and demos will be stored. You can also put pk3s and executables there.
 
 Related projects
 ================
@@ -53,7 +53,7 @@ As far as I know there are no projects developing jk2 online
 multiplayer client. Please let me know if you stumble upon any.
 
 If you are interested in capturing videos from jk2 demo files then
-check out the joMME_ project and mme branch of this repo.
+check out the joMME_ project and `mme branch`_ of this repo.
 
 If you play jk2 online on linux then you may also be interested in the
 recent revival of the xqf_ game server browser. I've pushed patches for
@@ -64,3 +64,4 @@ jk2 support.
 .. _OpenJK: https://github.com/JACoders/OpenJK
 .. _joMME: https://github.com/entdark/jk2mp/
 .. _xqf: https://github.com/XQF/xqf
+.. _mme brach: https://github.com/aufau/jedi-outcast/tree/mme

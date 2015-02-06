@@ -13,7 +13,7 @@ Q_EXPORT void dllEntry( int (QDECL *syscallptr)( int arg,... ) ) {
 }
 
 int PASSFLOAT( float x ) {
-	byteAlias_t fi;
+	floatint_t fi;
 	fi.f = x;
 	return fi.i;
 }
@@ -297,7 +297,7 @@ void trap_AAS_PresenceTypeBoundingBox(int presencetype, vec3_t mins, vec3_t maxs
 }
 
 float trap_AAS_Time(void) {
-	byteAlias_t temp;
+	floatint_t temp;
 	temp.i = syscall( BOTLIB_AAS_TIME );
 	return temp.f;
 }
@@ -491,13 +491,13 @@ void trap_BotFreeCharacter(int character) {
 }
 
 float trap_Characteristic_Float(int character, int index) {
-	byteAlias_t temp;
+	floatint_t temp;
 	temp.i = syscall( BOTLIB_AI_CHARACTERISTIC_FLOAT, character, index );
 	return temp.f;
 }
 
 float trap_Characteristic_BFloat(int character, int index, float min, float max) {
-	byteAlias_t temp;
+	floatint_t temp;
 	temp.i = syscall( BOTLIB_AI_CHARACTERISTIC_BFLOAT, character, index, PASSFLOAT(min), PASSFLOAT(max) );
 	return temp.f;
 }
@@ -667,7 +667,7 @@ int trap_BotGetMapLocationGoal(char *name, void /* struct bot_goal_s */ *goal) {
 }
 
 float trap_BotAvoidGoalTime(int goalstate, int number) {
-	byteAlias_t temp;
+	floatint_t temp;
 	temp.i = syscall( BOTLIB_AI_AVOID_GOAL_TIME, goalstate, number );
 	return temp.f;
 }

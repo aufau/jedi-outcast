@@ -301,7 +301,7 @@ void	*VM_ExplicitArgPtr( vm_t *vm, int intValue );
 #define VMA(x) VM_ArgPtr(args[x])
 static ID_INLINE float _vmf(int x)
 {
-        byteAlias_t fi;
+        floatint_t fi;
         fi.i = x;
         return fi.f;
 }

@@ -477,12 +477,10 @@ void CL_ShutdownCGame( void ) {
 #endif
 }
 
-static int	FloatAsInt( float f ) {
-	int		temp;
-
-	*(float *)&temp = f;
-
-	return temp;
+static int FloatAsInt( float f ) {
+	floatint_t fi;
+	fi.f = f;
+	return fi.i;
 }
 
 /*

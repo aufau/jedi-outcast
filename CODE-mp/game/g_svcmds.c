@@ -58,9 +58,10 @@ static qboolean StringToFilter (char *s, ipFilter_t *f)
 {
 	char		num[128];
 	int		i, j;
-	byteAlias_t	b, m;
-
-	b.ui = m.ui = 0u;
+	unsigned	compare = 0;
+	unsigned	mask = 0;
+	byte		*c = (byte *)&compare;
+	byte		*m = (byte *)&compare;
 
 	for (i=0 ; i<4 ; i++)
 	{
@@ -76,17 +77,17 @@ static qboolean StringToFilter (char *s, ipFilter_t *f)
 			num[j++] = *s++;
 		}
 		num[j] = 0;
-		b.b[i] = (byte) atoi(num);
-		if (b.b[i] != 0)
-			m.b[i] = 0xFF;
+		c[i] = (byte) atoi(num);
+		if (m[i] != 0)
+			m[i] = 0xFF;
 
 		if (!*s)
 			break;
 		s++;
 	}
 	
-	f->mask = m.ui;
-	f->compare = b.ui;
+	f->mask = mask;
+	f->compare = compare;
 	
 	return qtrue;
 }
@@ -98,7 +99,8 @@ UpdateIPBans
 */
 static void UpdateIPBans (void)
 {
-	byteAlias_t	b;
+	unsigned	compare;
+	char		*c = (char *)&compare;
 	int		i;
 	char		iplist[MAX_INFO_STRING];
 
@@ -108,9 +110,9 @@ static void UpdateIPBans (void)
 		if (ipFilters[i].compare == 0xffffffff)
 			continue;
 
-		b.ui = ipFilters[i].compare;
-		Com_sprintf( iplist + strlen(iplist), sizeof(iplist) - strlen(iplist), 
-			"%i.%i.%i.%i ", b.b[0], b.b[1], b.b[2], b.b[3]);
+		compare = ipFilters[i].compare;
+		Com_sprintf( iplist + strlen(iplist), sizeof(iplist) - strlen(iplist),
+			     "%i.%i.%i.%i ", c[0], c[1], c[2], c[3]);
 	}
 
 	trap_Cvar_Set( "g_banIPs", iplist );
@@ -124,15 +126,15 @@ G_FilterPacket
 qboolean G_FilterPacket (char *from)
 {
 	int		i;
-	byteAlias_t	m;
+	unsigned	mask = 0;
+	char		*m = (char *)&mask;
 	char *p;
 
-	m.ui = 0u;
 	i = 0;
 	p = from;
 	while (*p && i < 4) {
 		while (*p >= '0' && *p <= '9') {
-			m.b[i] = m.b[i]*10 + (*p - '0');
+			m[i] = m[i]*10 + (*p - '0');
 			p++;
 		}
 		if (!*p || *p == ':')
@@ -141,7 +143,7 @@ qboolean G_FilterPacket (char *from)
 	}
 	
 	for (i=0 ; i<numIPFilters ; i++)
-		if ( (m.ui & ipFilters[i].mask) == ipFilters[i].compare)
+		if ( (mask & ipFilters[i].mask) == ipFilters[i].compare)
 			return g_filterBan.integer != 0;
 
 	return g_filterBan.integer == 0;
