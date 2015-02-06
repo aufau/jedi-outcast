@@ -13,7 +13,6 @@ USER INTERFACE MAIN
 
 #include "ui_local.h"
 #include "../qcommon/qfiles.h"
-#include "../qcommon/game_version.h"
 #include "ui_force.h"
 
 /*
@@ -3714,11 +3713,11 @@ static void UI_LoadDemos() {
 	char	*demoname;
 	int		i, len;
 
-	Com_sprintf(demoExt, sizeof(demoExt), "dm_%d", (int)trap_Cvar_VariableValue("protocol"));
+	Com_sprintf(demoExt, sizeof(demoExt), DEMOEXT "%d", (int)trap_Cvar_VariableValue("protocol"));
 
 	uiInfo.demoCount = trap_FS_GetFileList( "demos", demoExt, demolist, 4096 );
 
-	Com_sprintf(demoExt, sizeof(demoExt), ".dm_%d", (int)trap_Cvar_VariableValue("protocol"));
+	Com_sprintf(demoExt, sizeof(demoExt), "." DEMOEXT "%d", (int)trap_Cvar_VariableValue("protocol"));
 
 	if (uiInfo.demoCount) {
 		if (uiInfo.demoCount > MAX_DEMOS) {

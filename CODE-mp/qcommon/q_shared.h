@@ -6,9 +6,50 @@
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 
-#define MAX_TEAMNAME 32
+#define PRODUCT_NAME			"JK2MP"
+#define BASEGAME			"base"
+#define CLIENT_WINDOW_TITLE		"Jedi Outcast MP"
+#define HOMEPATH_NAME_UNIX		".jkii"
+#define HOMEPATH_NAME_WIN
+#define HOMEPATH_NAME_MACOSX
+// Heartbeat for dpmaster protocol. You shouldn't change this unless you know what you're doing
+#define HEARTBEAT_FOR_MASTER		"QuakeArena-1"
+
+#ifndef PRODUCT_VERSION
+  #define PRODUCT_VERSION "1.04"
+#endif
+
+#define Q3_VERSION PRODUCT_NAME ": v" PRODUCT_VERSION
+
+#define MAX_TEAMNAME		32
+#define MAX_MASTER_SERVERS	5
+
+#define DEMOEXT "dm_"
 
 #include "disablewarnings.h"
+
+//Ignore __attribute__ on non-gcc platforms
+#ifndef __GNUC__
+#ifndef __attribute__
+#define __attribute__(x)
+#endif
+#endif
+
+#ifdef __GNUC__
+#define UNUSED_VAR __attribute__((unused))
+#else
+#define UNUSED_VAR
+#endif
+
+#if (defined _MSC_VER)
+#define Q_EXPORT __declspec(dllexport)
+#elif (defined __SUNPRO_C)
+#define Q_EXPORT __global
+#elif ((__GNUC__ >= 3) && (!__EMX__) && (!sun))
+#define Q_EXPORT __attribute__((visibility("default")))
+#else
+#define Q_EXPORT
+#endif
 
 /**********************************************************************
   VM Considerations

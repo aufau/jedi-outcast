@@ -33,8 +33,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #	include "sdl_icon.h"
 #endif
 
-#define CLIENT_WINDOW_TITLE "Jedi Knight 2: Jedi Outcast MP"
-
 static float displayAspect = 0.0f;
 
 typedef enum

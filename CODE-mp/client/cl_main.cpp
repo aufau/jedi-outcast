@@ -304,14 +304,14 @@ void CL_Record_f( void ) {
 	if ( Cmd_Argc() == 2 ) {
 		s = Cmd_Argv(1);
 		Q_strncpyz( demoName, s, sizeof( demoName ) );
-		Com_sprintf (name, sizeof(name), "demos/%s.dm_%d", demoName, PROTOCOL_VERSION );
+		Com_sprintf (name, sizeof(name), "demos/%s." DEMOEXT "%d", demoName, PROTOCOL_VERSION );
 	} else {
 		int		number;
 
 		// scan for a free demo name
 		for ( number = 0 ; number <= 9999 ; number++ ) {
 			CL_DemoFilename( number, demoName );
-			Com_sprintf (name, sizeof(name), "demos/%s.dm_%d", demoName, PROTOCOL_VERSION );
+			Com_sprintf (name, sizeof(name), "demos/%s." DEMOEXT "%d", demoName, PROTOCOL_VERSION );
 
 			len = FS_ReadFile( name, NULL );
 			if ( len <= 0 ) {
@@ -515,11 +515,11 @@ void CL_PlayDemo_f( void ) {
 
 	// open the demo file
 	arg = Cmd_Argv(1);
-	Com_sprintf(extension, sizeof(extension), ".dm_%d", PROTOCOL_VERSION);
+	Com_sprintf(extension, sizeof(extension), "." DEMOEXT "%d", PROTOCOL_VERSION);
 	if ( !Q_stricmp( arg + strlen(arg) - strlen(extension), extension ) ) {
 		Com_sprintf (name, sizeof(name), "demos/%s", arg);
 	} else {
-		Com_sprintf (name, sizeof(name), "demos/%s.dm_%d", arg, PROTOCOL_VERSION);
+		Com_sprintf (name, sizeof(name), "demos/%s." DEMOEXT "%d", arg, PROTOCOL_VERSION);
 	}
 	
 	FS_FOpenFileRead( name, &clc.demofile, qtrue );
