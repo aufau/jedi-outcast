@@ -112,6 +112,15 @@ typedef union {
 	unsigned int ui;
 } floatint_t;
 
+/*
+   This gets optimized-out on -O1 and above for most architectures.
+   On arches without unaligned memory access (mips, powerpc) you need
+   to either live with memcpy, or write proper type-punning via
+   union. ((floatint_t *)&f)->i and byteAlias_t break aliasing rules.
+*/
+
+#define cpy_unaligned(dest, src, n) memcpy(dest, src, n)
+
 #if defined (_MSC_VER) && (_MSC_VER >= 1600)
 
         #include <stdint.h>
