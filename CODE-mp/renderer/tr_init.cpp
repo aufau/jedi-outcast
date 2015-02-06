@@ -1239,7 +1239,7 @@ GetRefAPI
 
 @@@@@@@@@@@@@@@@@@@@@
 */
-refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
+Q_EXPORT refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	static refexport_t	re;
 
 	ri = *rimp;

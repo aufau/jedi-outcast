@@ -1,7 +1,7 @@
 Description
 ===========
 
-This is a fork of ioquake/jedi-outcast github repository. Apparently
+This is a fork of `ioquake/jedi-outcast`_ github repository. Apparently
 the development is dead over there but I would be happy to merge back
 my commits when it comes back alive.
 
@@ -32,7 +32,7 @@ Dependencies
 Compiling
 ---------
 
-::
+In the repo's main directory::
 
    mkdir build && cd build
    cmake ../CODE-mp/
@@ -59,6 +59,7 @@ If you play jk2 online on linux then you may also be interested in the
 recent revival of the xqf_ game server browser. I've pushed patches for
 jk2 support.
 
+.. _ioquake/jedi-outcast: https://github.com/ioquake/jedi-outcast/
 .. _ioq3: https://github.com/ioquake/ioq3/
 .. _OpenJK: https://github.com/JACoders/OpenJK
 .. _joMME: https://github.com/entdark/jk2mp/

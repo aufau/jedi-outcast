@@ -520,7 +520,7 @@ void *Sys_GetGameAPI (void *parms)
 	Com_Printf("------- Loading %s -------\n", gamename);
 	Com_sprintf (name, sizeof(name), "%s/%s", curpath, gamename);
 
-	game_library = dlopen (name, RTLD_LAZY );
+	game_library = dlopen (name, Q_LTRD );
 	if (game_library)
 		Com_DPrintf ("LoadLibrary (%s)\n",name);
 	else {
@@ -592,7 +592,7 @@ void *Sys_GetCGameAPI (void)
 	Com_Printf("------- Loading %s -------\n", cgamename);
 
 	sprintf (name, "%s/%s", curpath, cgamename);
-	cgame_library = dlopen (name, RTLD_LAZY );
+	cgame_library = dlopen (name, Q_LTRD );
 	if (!cgame_library)
 	{
 		Com_Printf ("LoadLibrary (%s)\n",name);
@@ -660,7 +660,7 @@ void *Sys_GetUIAPI (void)
 	Com_Printf("------- Loading %s -------\n", uiname);
 
 	sprintf (name, "%s/%s", curpath, uiname);
-	ui_library = dlopen (name, RTLD_LAZY );
+	ui_library = dlopen (name, Q_LTRD );
 	if (!ui_library)
 	{
 		Com_Printf ("LoadLibrary (%s)\n",name);

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
+#SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(jk2mp)
 
@@ -21,19 +22,19 @@ if (cpu STREQUAL "x86_64")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -g  -msse2 -mmmx -O2")
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -msse2 -mmmx -O2")
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -ggdb -O0")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-	# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-braces")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-variable")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -g -msse2 -mmmx -O2")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -msse2 -mmmx -O2")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -O0")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-#	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare")
@@ -426,6 +427,8 @@ set(src_ui_game
 	game/bg_lib.c
 	game/bg_misc.c
 	game/bg_weapons.c
+	game/q_math.c
+	game/q_shared.c
 )
 
 set(src_ui_ui
@@ -440,8 +443,6 @@ set(src_ui_ui
 add_library(ui${cpu} SHARED
 	${src_ui_game}
 	${src_ui_ui}
-	qcommon/q_math.cpp
-	qcommon/q_shared.cpp
 )
 
 set_target_properties(ui${cpu} PROPERTIES PREFIX "")
@@ -491,6 +492,8 @@ set(src_cgame_game
 	game/bg_saber.c
 	game/bg_slidemove.c
 	game/bg_weapons.c
+	game/q_math.c
+	game/q_shared.c
 )
 
 set(src_cgame_ui
@@ -501,8 +504,6 @@ add_library(cgame${cpu} SHARED
 	${src_cgame_cgame}
 	${src_cgame_game}
 	${src_cgame_ui}
-	qcommon/q_math.cpp
-	qcommon/q_shared.cpp
 )
 
 set_target_properties(cgame${cpu} PROPERTIES PREFIX "")
@@ -543,14 +544,14 @@ set(src_game_game
 	game/g_trigger.c
 	game/g_utils.c
 	game/g_weapon.c
+	game/q_math.c
+	game/q_shared.c
 	game/w_force.c
 	game/w_saber.c
 )
 
 add_library(jk2mpgame${cpu} SHARED
 	${src_game_game}
-	qcommon/q_math.cpp
-	qcommon/q_shared.cpp
 )
 
 set_target_properties(jk2mpgame${cpu} PROPERTIES PREFIX "")
