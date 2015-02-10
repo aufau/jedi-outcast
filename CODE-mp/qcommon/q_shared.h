@@ -116,10 +116,13 @@ typedef union {
    This gets optimized-out on -O1 and above for most architectures.
    On arches without unaligned memory access (mips, powerpc) you need
    to either live with memcpy, or write proper type-punning via
-   union. ((floatint_t *)&f)->i and byteAlias_t break aliasing rules.
+   union. ((alias_t *)&bytes[0])->integer DOES break aliasing rules.
 */
 
 #define cpy_unaligned(dest, src, n) memcpy(dest, src, n)
+#define put_unaligned(type, x, ptr)		\
+	type __x = x;				\
+	memcpy((ptr), &__x, sizeof(type));
 
 #if defined (_MSC_VER) && (_MSC_VER >= 1600)
 
