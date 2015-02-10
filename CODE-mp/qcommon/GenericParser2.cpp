@@ -15,8 +15,8 @@ static char	token[MAX_TOKEN_SIZE];
 static char *GetToken(char **text, bool allowLineBreaks, bool readUntilEOL = false)
 {
 	char	*pointer = *text;
-	int		length = 0;
-	int		c = 0;
+	size_t	length = 0;
+	int	c = 0;
 	bool	foundLineBreak;
 
 	token[0] = 0;
@@ -134,7 +134,11 @@ static char *GetToken(char **text, bool allowLineBreaks, bool readUntilEOL = fal
 		}
 	}
 
-	if (token[0] == '\"')
+	if (length >= MAX_TOKEN_SIZE)
+	{
+		length = 0;
+	}
+	else if (length && token[0] == '\"')
 	{	// remove start quote
 		length--;
 		memmove(token, token+1, length);
@@ -145,10 +149,6 @@ static char *GetToken(char **text, bool allowLineBreaks, bool readUntilEOL = fal
 		}
 	}
 
-	if (length >= MAX_TOKEN_SIZE)
-	{
-		length = 0;
-	}
 	token[length] = 0;
 	*text = (char *)pointer;
 
