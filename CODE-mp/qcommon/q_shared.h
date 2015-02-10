@@ -43,12 +43,16 @@
 
 #if (defined _MSC_VER)
 #define Q_EXPORT __declspec(dllexport)
+#define Q_NORETURN __declspec(noreturn)
 #elif (defined __SUNPRO_C)
 #define Q_EXPORT __global
+#define Q_NORETURN
 #elif ((__GNUC__ >= 3) && (!__EMX__) && (!sun))
 #define Q_EXPORT __attribute__((visibility("default")))
+#define Q_NORETURN __attribute__((noreturn))
 #else
 #define Q_EXPORT
+#define Q_NORETURN
 #endif
 
 /**********************************************************************
@@ -1005,7 +1009,7 @@ qboolean Info_Validate( const char *s );
 void Info_NextPair( const char **s, char *key, char *value );
 
 // this is only here so the functions in q_shared.c and bg_*.c can link
-void	QDECL Com_Error( int level, const char *error, ... );
+void	QDECL Q_NORETURN Com_Error( int level, const char *error, ... );
 void	QDECL Com_Printf( const char *msg, ... );
 
 

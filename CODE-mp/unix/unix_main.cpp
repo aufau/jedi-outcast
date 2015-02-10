@@ -143,7 +143,8 @@ void Sys_Printf (char *fmt, ...)
 }
 
 // bk010104 - added for abstraction
-static __attribute__ ((noreturn)) void Sys_Exit( int exitCode ) {
+static void Sys_Exit( int exitCode )
+{
 #ifndef DEDICATED
 	SDL_Quit();
 #endif
@@ -234,7 +235,7 @@ void Sys_Init(void)
 	Cvar_Set( "username", Sys_GetCurrentUser() );
 }
 
-void	Sys_Error( const char *error, ...)
+void Sys_Error( const char *error, ...)
 { 
     va_list     argptr;
     char        string[1024];

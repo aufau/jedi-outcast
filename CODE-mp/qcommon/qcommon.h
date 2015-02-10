@@ -663,8 +663,8 @@ void		Com_EndRedirect( void );
 void 		QDECL Com_Printf( const char *fmt, ... );
 void 		QDECL Com_DPrintf( const char *fmt, ... );
 void		QDECL Com_OPrintf( const char *fmt, ...); // Outputs to the VC / Windows Debug window (only in debug compile)
-void 		QDECL Com_Error( int code, const char *fmt, ... );
-void 		Com_Quit_f( void );
+void Q_NORETURN	QDECL Com_Error( int code, const char *fmt, ... );
+void Q_NORETURN	Com_Quit_f( void );
 int			Com_EventLoop( void );
 int			Com_Milliseconds( void );	// will be journaled properly
 unsigned	Com_BlockChecksum( const void *buffer, int length );
@@ -939,8 +939,8 @@ void	*Sys_GetBotLibAPI( void *parms );
 
 char	*Sys_GetCurrentUser( void );
 
-void	QDECL Sys_Error( const char *error, ...);
-void	Sys_Quit (void);
+void	QDECL Q_NORETURN Sys_Error( const char *error, ...);
+void	Q_NORETURN Sys_Quit (void);
 char	*Sys_GetClipboardData( void );	// note that this isn't journaled...
 
 void	Sys_Print( const char *msg );
