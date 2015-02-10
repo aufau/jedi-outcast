@@ -12,7 +12,7 @@
  *
  *****************************************************************************/
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "l_memory.h"
 #include "l_libvar.h"
 #include "l_utils.h"
@@ -3532,7 +3532,7 @@ void BotResetLastAvoidReach(int movestate)
 	if (latesttime)
 	{
 		ms->avoidreachtimes[latest] = 0;
-		if (ms->avoidreachtries[i] > 0) ms->avoidreachtries[latest]--;
+		if (ms->avoidreachtries[latest] > 0) ms->avoidreachtries[latest]--;
 	} //end if
 } //end of the function BotResetLastAvoidReach
 //===========================================================================

@@ -9,7 +9,7 @@
 ** QGL_Shutdown() - unloads libraries, NULLs function pointers
 */
 #include <float.h>
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../renderer/tr_local.h"
 #include "unix_glw.h"
 #include "../client/client.h"

@@ -3,8 +3,6 @@
 #include "client.h"
 #include "../strings/con_text.h"
 #include "../qcommon/strip.h"
-#include "../qcommon/game_version.h"
-
 
 int g_console_field_width = 78;
 
@@ -201,7 +199,7 @@ If the line width has changed, reformat the buffer.
 void Con_CheckResize (void)
 {
 	int		i, j, width, oldwidth, oldtotallines, numlines, numchars;
-	MAC_STATIC short	tbuf[CON_TEXTSIZE];
+	short	tbuf[CON_TEXTSIZE];
 
 //	width = (SCREEN_WIDTH / SMALLCHAR_WIDTH) - 2;
 	width = (cls.glconfig.vidWidth / SMALLCHAR_WIDTH) - 2;

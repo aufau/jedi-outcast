@@ -1,9 +1,8 @@
 // common.c -- misc functions used in client and server
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 #include "strip.h"
-#include "../qcommon/game_version.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -70,6 +69,15 @@ cvar_t	*sv_paused;
 cvar_t	*com_cameraMode;
 #if defined(_WIN32) && defined(_DEBUG)
 cvar_t	*com_noErrorInterrupt;
+#endif
+cvar_t  *com_busyWait;
+
+#if idx64
+	int (*Q_VMftol)(void);
+#elif id386
+	long (QDECL *Q_ftol)(float f);
+	int (QDECL *Q_VMftol)(void);
+	void (QDECL *Q_SnapVector)(vec3_t vec);
 #endif
 
 // com_speeds times
@@ -230,21 +238,16 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void QDECL Com_Error( int code, const char *fmt, ... ) {
+void QDECL Com_Error ( int code, const char *fmt, ... ) {
 	va_list		argptr;
 	static int	lastErrorTime;
 	static int	errorCount;
 	int			currentTime;
 
-#if defined(_WIN32) && defined(_DEBUG)
-	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
-		if (com_noErrorInterrupt && !com_noErrorInterrupt->integer) {
-			__asm {
-				int 0x03
-			}
-		}
+	if ( com_errorEntered ) {
+		Sys_Error( "recursive error after: %s", com_errorMessage );
 	}
-#endif
+	com_errorEntered = qtrue;
 
 	// when we are running automated scripts, make sure we
 	// know if anything failed
@@ -266,45 +269,52 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	}
 	lastErrorTime = currentTime;
 
-	if ( com_errorEntered ) {
-		Sys_Error( "recursive error after: %s", com_errorMessage );
-	}
-	com_errorEntered = qtrue;
 
 	va_start (argptr,fmt);
 	vsprintf (com_errorMessage,fmt,argptr);
 	va_end (argptr);
 
-	if ( code != ERR_DISCONNECT ) {
+	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
 		Cvar_Get("com_errorMessage", "", CVAR_ROM);	//give com_errorMessage a default so it won't come back to life after a resetDefaults
 		Cvar_Set("com_errorMessage", com_errorMessage);
 	}
 
-	if ( code == ERR_SERVERDISCONNECT ) {
+	if ( code == ERR_DISCONNECT || code == ERR_SERVERDISCONNECT ) {
+		VM_Forced_Unload_Start();
+		SV_Shutdown( "Server disconnected" );
 		CL_Disconnect( qtrue );
 		CL_FlushMemory( );
+		VM_Forced_Unload_Done();
 		com_errorEntered = qfalse;
 		throw ("DISCONNECTED\n");
-	} else if ( code == ERR_DROP || code == ERR_DISCONNECT ) {
+	} else if ( code == ERR_DROP ) {
 		Com_Printf ("********************\nERROR: %s\n********************\n", com_errorMessage);
+		VM_Forced_Unload_Start();
 		SV_Shutdown (va("Server crashed: %s\n",  com_errorMessage));
 		CL_Disconnect( qtrue );
 		CL_FlushMemory( );
+		VM_Forced_Unload_Done();
 		com_errorEntered = qfalse;
 		throw ("DROPPED\n");
 	} else if ( code == ERR_NEED_CD ) {
+		VM_Forced_Unload_Start();
 		SV_Shutdown( "Server didn't have CD\n" );
 		if ( com_cl_running && com_cl_running->integer ) {
 			CL_Disconnect( qtrue );
 			CL_FlushMemory( );
+			VM_Forced_Unload_Done();
 			com_errorEntered = qfalse;
 		} else {
 			Com_Printf("Server didn't have CD\n" );
+			VM_Forced_Unload_Done();
 		}
+		com_errorEntered = qfalse;
 		throw ("NEED CD\n");
 	} else {
+		VM_Forced_Unload_Start();
 		CL_Shutdown ();
 		SV_Shutdown (va("Server fatal crashed: %s\n", com_errorMessage));
+		VM_Forced_Unload_Done();
 	}
 
 	Com_Shutdown ();
@@ -321,11 +331,18 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Quit_f( void ) {
+void Q_NORETURN Com_Quit_f( void ) {
 	// don't try to shutdown if we are in a recursive error
+        char *p = Cmd_Args( );
 	if ( !com_errorEntered ) {
-		SV_Shutdown ("Server quit\n");
+                // Some VMs might execute "quit" command directly,
+                // which would trigger an unload of active VM error.
+                // Sys_Quit will kill this process anyways, so
+                // a corrupt call stack makes no difference
+                VM_Forced_Unload_Start();
+		SV_Shutdown (p[0] ? p : "Server quit\n");
 		CL_Shutdown ();
+                VM_Forced_Unload_Done();
 		Com_Shutdown ();
 		FS_Shutdown(qtrue);
 	}
@@ -2454,6 +2471,52 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 
 #endif // USE_CD_KEY
 
+/*
+=================
+Com_DetectSSE
+Find out whether we have SSE support for Q_ftol function
+=================
+*/
+
+#if id386 || idx64
+
+static void Com_DetectSSE(void)
+{
+#if !idx64
+	cpuFeatures_t feat;
+	
+	feat = Sys_GetProcessorFeatures();
+
+	if(feat & CF_SSE)
+	{
+		if(feat & CF_SSE2)
+			Q_SnapVector = qsnapvectorsse;
+		else
+			Q_SnapVector = qsnapvectorx87;
+
+		Q_ftol = qftolsse;
+#endif
+		Q_VMftol = qvmftolsse;
+
+		Com_Printf("Have SSE support\n");
+#if !idx64
+	}
+	else
+	{
+		Q_ftol = qftolx87;
+		Q_VMftol = qvmftolx87;
+		Q_SnapVector = qsnapvectorx87;
+
+		Com_Printf("No SSE support on this machine\n");
+	}
+#endif
+}
+
+#else
+
+#define Com_DetectSSE()
+
+#endif // id386 || idx64
 
 #ifdef MEM_DEBUG
 	void SH_Register(void);
@@ -2467,7 +2530,7 @@ Com_Init
 void Com_Init( char *commandLine ) {
 	char	*s;
 
-	Com_Printf( "%s %s %s\n", Q3_VERSION, CPUSTRING, __DATE__ );
+	Com_Printf( "%s %s %s\n", Q3_VERSION, PLATFORM_STRING, __DATE__ );
 
 	try
 	{
@@ -2482,6 +2545,8 @@ void Com_Init( char *commandLine ) {
 
 	//	Swap_Init ();
 		Cbuf_Init ();
+
+		Com_DetectSSE();
 
 		Com_InitZoneMemory();
 		Cmd_Init ();
@@ -2553,6 +2618,7 @@ void Com_Init( char *commandLine ) {
 		com_sv_running = Cvar_Get ("sv_running", "0", CVAR_ROM);
 		com_cl_running = Cvar_Get ("cl_running", "0", CVAR_ROM);
 		com_buildScript = Cvar_Get( "com_buildScript", "0", 0 );
+		com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
 
 		com_introPlayed = Cvar_Get( "com_introplayed", "0", CVAR_ARCHIVE);
 
@@ -2578,7 +2644,7 @@ void Com_Init( char *commandLine ) {
 		Cmd_AddCommand ("changeVectors", MSG_ReportChangeVectors_f );
 		Cmd_AddCommand ("writeconfig", Com_WriteConfig_f );
 
-		s = va("%s %s %s", Q3_VERSION, CPUSTRING, __DATE__ );
+		s = va("%s %s %s", Q3_VERSION, PLATFORM_STRING, __DATE__ );
 		com_version = Cvar_Get ("version", s, CVAR_ROM | CVAR_SERVERINFO );
 
 		SP_Init();
@@ -2774,6 +2840,27 @@ int Com_ModifyMsec( int msec ) {
 	return msec;
 }
 
+
+/*
+=================
+Com_TimeVal
+=================
+*/
+
+int Com_TimeVal(int minMsec)
+{
+	int timeVal;
+
+	timeVal = Sys_Milliseconds() - com_frameTime;
+
+	if(timeVal >= minMsec)
+		timeVal = 0;
+	else
+		timeVal = minMsec - timeVal;
+
+	return timeVal;
+}
+
 /*
 =================
 Com_Frame
@@ -2784,7 +2871,8 @@ void Com_Frame( void ) {
 try
 {
 	int		msec, minMsec;
-	static int	lastTime;
+	int		timeVal;
+	static int	lastTime = 0, bias = 0;
 	int key;
  
 	int		timeBeforeFirstEvents;
@@ -2827,19 +2915,35 @@ try
 	// we may want to spin here if things are going too fast
 	if ( !com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer ) {
 		minMsec = 1000 / com_maxfps->integer;
+
+		timeVal = com_frameTime - lastTime;
+		bias += timeVal - minMsec;
+
+		if(bias > minMsec)
+			bias = minMsec;
+
+		// Adjust minMsec if previous frame took too long to render so
+		// that framerate is stable at the requested value.
+		minMsec -= bias;
+
 	} else {
 		minMsec = 1;
 	}
 	do {
-		com_frameTime = Com_EventLoop();
-		if ( lastTime > com_frameTime ) {
-			lastTime = com_frameTime;		// possible on first frame
-		}
-		msec = com_frameTime - lastTime;
-	} while ( msec < minMsec );
-	Cbuf_Execute ();
+		timeVal = Com_TimeVal(minMsec);
+
+		if(com_busyWait->integer || timeVal < 1)
+			NET_Sleep(0);
+		else
+			NET_Sleep(timeVal - 1);
+	} while (Com_TimeVal(minMsec));
 
 	lastTime = com_frameTime;
+	com_frameTime = Com_EventLoop();
+
+	msec = com_frameTime - lastTime;
+
+	Cbuf_Execute ();
 
 	// mess with msec if needed
 	com_frameMsec = msec;
@@ -3292,34 +3396,3 @@ skipClamp:
 
 #endif // bk001208 - memset/memcpy assembly, Q_acos needed (RC4)
 //------------------------------------------------------------------------
-
-
-/*
-=====================
-Q_acos
-
-the msvc acos doesn't always return a value between -PI and PI:
-
-int i;
-i = 1065353246;
-acos(*(float*) &i) == -1.#IND0
-
-	This should go in q_math but it is too late to add new traps
-	to game and ui
-=====================
-*/
-float Q_acos(float c) {
-	float angle;
-
-	angle = acos(c);
-
-	if (angle > M_PI) {
-		return (float)M_PI;
-	}
-	if (angle < -M_PI) {
-		return (float)M_PI;
-	}
-	return angle;
-}
-
-

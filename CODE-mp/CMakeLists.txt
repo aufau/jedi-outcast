@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
+#SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(jk2mp)
 
@@ -14,42 +16,31 @@ if (cpu STREQUAL "x86_64")
 	set(CMAKE_LIBRARY_PATH  "/usr/lib32")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-	set(CMAKE_C_SIZEOF_DATA_PTR 4) # Forces correct output format for NASM
+	set(CMAKE_CXX_SIZEOF_DATA_PTR 4) # Forces correct output format for NASM
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32")
 	set(cpu "x86")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -g -O2")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse2 -mmmx -mfpmath=sse")
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Og")
-	if(NOT CMAKE_BUILD_TYPE)
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
-	endif()
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-overflow")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -msse2 -mmmx -O2")
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -ggdb -O0")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-braces")
-# 	# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-overflow=5")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result") # fixme!!
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-variable")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-write-strings")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -Wall -g -O2")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse2 -mmmx -mfpmath=sse")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og")
-	if(NOT CMAKE_BUILD_TYPE)
-		set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -march=native")
-	endif()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-overflow")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -msse2 -mmmx -O2")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -O0")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-aliasing")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare")
-#	# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstrict-overflow=5")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result") # fixme!!
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings")
 	set_source_files_properties(png/png.cpp PROPERTIES COMPILE_FLAGS "-Wno-multichar")
 endif()
 
@@ -80,23 +71,37 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 add_definitions( -D_M_IX86=1 )  # tested to mean little endian...
 add_definitions( -D_JK2 )
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-	add_definitions( -DFINAL_BUILD )
-endif()
-if(NOT CMAKE_BUILD_TYPE)
-	add_definitions( -DFINAL_BUILD )
+add_definitions( -DUSE_ICON )
+add_definitions( -DFINAL_BUILD )
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+#	add_definitions( -DDEBUG_VM )
+elseif("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+	add_definitions( -DNDEBUG )
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i586")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=i586")
+else()
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+	add_definitions( -DNDEBUG )
 endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "base")
 
-find_package (SDL REQUIRED)
-include_directories(${SDL_INCLUDE_DIR})
+find_package (SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIR})
 
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
+
+ENABLE_LANGUAGE(ASM_NASM)
+
+set(src_main_asm
+	asm/ftola.cpp
+	asm/snapvector.cpp
+)
 
 set(src_main_client
 	client/FXExport.cpp
@@ -305,26 +310,22 @@ set(src_main_zlib
 	zlib/zutil.c
 )
 
-ENABLE_LANGUAGE(ASM_NASM)
-
 set(src_unix_common
 	unix/unix_main.cpp
 	unix/unix_net.cpp
 	unix/unix_shared.cpp
-	unix/ftol.nasm
-	unix/snapvector.nasm
 )
 
 set(src_main_unix
 	${src_unix_common}
 	unix/unix_glimp_common.cpp
-	null/null_snddma.cpp
 )
 
 set(src_sdl
 	sdl/sdl_gamma.cpp
 	sdl/sdl_glimp.cpp
 	sdl/sdl_input.cpp
+	sdl/sdl_snd.cpp
 )
 
 set(src_botlib
@@ -359,6 +360,7 @@ set(src_botlib
 )
 
 set(src_jk2mp
+	${src_main_asm}
 	${src_main_client}
 	${src_main_encryption}
 	${src_main_ghoul2}
@@ -382,7 +384,7 @@ set_target_properties(jk2mp PROPERTIES COMPILE_DEFINITIONS "_JK2EXE;_FF_DISABLE;
 
 target_link_libraries(jk2mp
 	m pthread
-	${SDL_LIBRARY}
+	${SDL2_LIBRARY}
 	${OPENGL_gl_LIBRARY}
 	${OPENAL_LIBRARY}
 )
@@ -391,38 +393,39 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 	target_link_libraries(jk2mp dl)
 endif()
 
-set(src_ded_null
-	null/null_client.cpp
-	null/null_glimp.cpp
-	null/null_input.cpp
-	null/null_renderer.cpp
-	null/null_snddma.cpp
-)
+# set(src_ded_null
+# 	null/null_client.cpp
+# 	null/null_glimp.cpp
+# 	null/null_input.cpp
+# 	null/null_renderer.cpp
+# 	null/null_snddma.cpp
+# )
 
-set(src_jk2mp_ded
-	${src_main_ghoul2}
-	${src_main_qcommon}
-	${src_renderer_common}
-	${src_main_server}
-	${src_main_zlib}
-	${src_botlib}
-	${src_unix_common}
-	${src_ded_null}
-)
+# set(src_jk2mp_ded
+#	${src_main_asm}
+# 	${src_main_ghoul2}
+# 	${src_main_qcommon}
+# 	${src_renderer_common}
+# 	${src_main_server}
+# 	${src_main_zlib}
+# 	${src_botlib}
+# 	${src_unix_common}
+# 	${src_ded_null}
+# )
 
-add_executable(jk2mpded
-	${src_jk2mp_ded}
-)
+# add_executable(jk2mpded
+# 	${src_jk2mp_ded}
+# )
 
-set_target_properties(jk2mpded PROPERTIES COMPILE_DEFINITIONS "_JK2EXE;_FF_DISABLE;BOTLIB;DEDICATED")
+# set_target_properties(jk2mpded PROPERTIES COMPILE_DEFINITIONS "_JK2EXE;_FF_DISABLE;BOTLIB;DEDICATED")
 
-target_link_libraries(jk2mpded
-	m pthread
-)
+# target_link_libraries(jk2mpded
+# 	m pthread
+# )
 
-if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-	target_link_libraries(jk2mpded dl)
-endif()
+# if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+# 	target_link_libraries(jk2mpded dl)
+# endif()
 
 set(src_ui_game
 	game/bg_lib.c

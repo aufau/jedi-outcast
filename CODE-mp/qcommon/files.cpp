@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "../client/client.h"
 #include "qcommon.h"
 #include "unzip.h"
@@ -1032,7 +1032,7 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 		Com_Error( ERR_FATAL, "FS_FOpenFileRead: NULL 'filename' parameter passed\n" );
 	}
 
-	Com_sprintf (demoExt, sizeof(demoExt), ".dm_%d",PROTOCOL_VERSION );
+	Com_sprintf (demoExt, sizeof(demoExt), "." DEMOEXT "%d",PROTOCOL_VERSION );
 	// qpaths are not supposed to have a leading slash
 	if ( filename[0] == '/' || filename[0] == '\\' ) {
 		filename++;
@@ -1233,7 +1233,6 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 	*file = 0;
 	return -1;
 }
-
 
 /*
 =================

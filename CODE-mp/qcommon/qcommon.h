@@ -3,7 +3,7 @@
 #define _QCOMMON_H_
 
 #include "../qcommon/cm_public.h"
-#include "../game/q_shared.h"
+#include "q_shared.h"
 
 //#define	PRE_RELEASE_DEMO
 
@@ -200,7 +200,7 @@ PROTOCOL
 #define	PROTOCOL_VERSION	16	//v1.04
 
 #define	UPDATE_SERVER_NAME		"updatejk2.ravensoft.com"
-#define MASTER_SERVER_NAME		"masterjk2.ravensoft.com"
+#define MASTER_SERVER_NAME		"master.ouned.de"
 
 #ifdef USE_CD_KEY
 #define	AUTHORIZE_SERVER_NAME	"authorizejk2.ravensoft.com"
@@ -287,6 +287,8 @@ vm_t	*VM_Create( const char *module, int (*systemCalls)(int *),
 
 void	VM_Free( vm_t *vm );
 void	VM_Clear(void);
+void	VM_Forced_Unload_Start(void);
+void	VM_Forced_Unload_Done(void);
 vm_t	*VM_Restart( vm_t *vm );
 
 int		QDECL VM_Call( vm_t *vm, int callNum, ... );
@@ -295,6 +297,15 @@ void	VM_Debug( int level );
 
 void	*VM_ArgPtr( int intValue );
 void	*VM_ExplicitArgPtr( vm_t *vm, int intValue );
+
+#define VMA(x) VM_ArgPtr(args[x])
+static ID_INLINE float _vmf(int x)
+{
+        floatint_t fi;
+        fi.i = x;
+        return fi.f;
+}
+#define VMF(x)  _vmf(args[x])
 
 /*
 ==============================================================
@@ -610,6 +621,20 @@ MISC
 ==============================================================
 */
 
+// returned by Sys_GetProcessorFeatures
+typedef int cpuFeatures_t;
+
+#define CF_NONE		0
+#define CF_RDTSC	1 << 0
+#define CF_MMX		1 << 1
+#define CF_MMX_EXT	1 << 2
+#define CF_3DNOW	1 << 3
+#define CF_3DNOW_EXT	1 << 4
+#define CF_SSE		1 << 5
+#define CF_SSE2		1 << 6
+#define CF_ALTIVEC	1 << 7
+
+
 // NOTE NOTE NOTE!!!!!!!!!!!!!
 //
 // Any CPUID_XXXX defined as higher than CPUID_INTEL_MMX *must* have MMX support (eg like CPUID_AMD_3DNOW (0x30) has),
@@ -641,8 +666,8 @@ void		Com_EndRedirect( void );
 void 		QDECL Com_Printf( const char *fmt, ... );
 void 		QDECL Com_DPrintf( const char *fmt, ... );
 void		QDECL Com_OPrintf( const char *fmt, ...); // Outputs to the VC / Windows Debug window (only in debug compile)
-void 		QDECL Com_Error( int code, const char *fmt, ... );
-void 		Com_Quit_f( void );
+void Q_NORETURN	QDECL Com_Error( int code, const char *fmt, ... );
+void Q_NORETURN	Com_Quit_f( void );
 int			Com_EventLoop( void );
 int			Com_Milliseconds( void );	// will be journaled properly
 unsigned	Com_BlockChecksum( const void *buffer, int length );
@@ -846,7 +871,7 @@ void SCR_DebugGraph (float value, int color);	// FIXME: move logging to common?
 // server interface
 //
 void SV_Init( void );
-void SV_Shutdown( char *finalmsg );
+void SV_Shutdown( const char *finalmsg );
 void SV_Frame( int msec );
 void SV_PacketEvent( netadr_t from, msg_t *msg );
 qboolean SV_GameCommand( void );
@@ -919,8 +944,8 @@ void	*Sys_GetBotLibAPI( void *parms );
 
 char	*Sys_GetCurrentUser( void );
 
-void	QDECL Sys_Error( const char *error, ...);
-void	Sys_Quit (void);
+void	QDECL Q_NORETURN Sys_Error( const char *error, ...);
+void	Q_NORETURN Sys_Quit (void);
 char	*Sys_GetClipboardData( void );	// note that this isn't journaled...
 
 void	Sys_Print( const char *msg );
@@ -929,15 +954,10 @@ void	Sys_Print( const char *msg );
 // any game related timing information should come from event timestamps
 int		Sys_Milliseconds (void);
 
-#ifndef _MSVC_VER
-extern "C" void	Sys_SnapVector( float *v );
-
-#else
-void	Sys_SnapVector( float *v );
-#endif
-
 // the system console is shown when a dedicated server is running
 void	Sys_DisplaySystemConsole( qboolean show );
+
+cpuFeatures_t Sys_GetProcessorFeatures( void );
 
 int		Sys_GetProcessorId( void );
 int		Sys_GetCPUSpeed( void );

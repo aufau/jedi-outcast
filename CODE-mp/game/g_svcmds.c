@@ -56,17 +56,13 @@ StringToFilter
 */
 static qboolean StringToFilter (char *s, ipFilter_t *f)
 {
-	char	num[128];
+	char		num[128];
 	int		i, j;
-	byte	b[4];
-	byte	m[4];
-	
-	for (i=0 ; i<4 ; i++)
-	{
-		b[i] = 0;
-		m[i] = 0;
-	}
-	
+	unsigned	compare = 0;
+	unsigned	mask = 0;
+	byte		*c = (byte *)&compare;
+	byte		*m = (byte *)&compare;
+
 	for (i=0 ; i<4 ; i++)
 	{
 		if (*s < '0' || *s > '9')
@@ -81,17 +77,17 @@ static qboolean StringToFilter (char *s, ipFilter_t *f)
 			num[j++] = *s++;
 		}
 		num[j] = 0;
-		b[i] = atoi(num);
-		if (b[i] != 0)
-			m[i] = 255;
+		c[i] = (byte) atoi(num);
+		if (m[i] != 0)
+			m[i] = 0xFF;
 
 		if (!*s)
 			break;
 		s++;
 	}
 	
-	f->mask = *(unsigned *)m;
-	f->compare = *(unsigned *)b;
+	f->mask = mask;
+	f->compare = compare;
 	
 	return qtrue;
 }
@@ -103,9 +99,10 @@ UpdateIPBans
 */
 static void UpdateIPBans (void)
 {
-	byte	b[4];
+	unsigned	compare;
+	char		*c = (char *)&compare;
 	int		i;
-	char	iplist[MAX_INFO_STRING];
+	char		iplist[MAX_INFO_STRING];
 
 	*iplist = 0;
 	for (i = 0 ; i < numIPFilters ; i++)
@@ -113,9 +110,9 @@ static void UpdateIPBans (void)
 		if (ipFilters[i].compare == 0xffffffff)
 			continue;
 
-		*(unsigned *)b = ipFilters[i].compare;
-		Com_sprintf( iplist + strlen(iplist), sizeof(iplist) - strlen(iplist), 
-			"%i.%i.%i.%i ", b[0], b[1], b[2], b[3]);
+		compare = ipFilters[i].compare;
+		Com_sprintf( iplist + strlen(iplist), sizeof(iplist) - strlen(iplist),
+			     "%i.%i.%i.%i ", c[0], c[1], c[2], c[3]);
 	}
 
 	trap_Cvar_Set( "g_banIPs", iplist );
@@ -129,14 +126,13 @@ G_FilterPacket
 qboolean G_FilterPacket (char *from)
 {
 	int		i;
-	unsigned	in;
-	byte m[4] = {'\0','\0','\0','\0'};
+	unsigned	mask = 0;
+	char		*m = (char *)&mask;
 	char *p;
 
 	i = 0;
 	p = from;
 	while (*p && i < 4) {
-		m[i] = 0;
 		while (*p >= '0' && *p <= '9') {
 			m[i] = m[i]*10 + (*p - '0');
 			p++;
@@ -146,10 +142,8 @@ qboolean G_FilterPacket (char *from)
 		i++, p++;
 	}
 	
-	in = *(unsigned *)m;
-
 	for (i=0 ; i<numIPFilters ; i++)
-		if ( (in & ipFilters[i].mask) == ipFilters[i].compare)
+		if ( (mask & ipFilters[i].mask) == ipFilters[i].compare)
 			return g_filterBan.integer != 0;
 
 	return g_filterBan.integer == 0;

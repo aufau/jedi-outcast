@@ -108,7 +108,7 @@ void R_IssueRenderCommands( qboolean runPerformanceCounters ) {
 	cmdList = &backEndData[tr.smpFrame]->commands;
 	assert(cmdList); // bk001205
 	// add an end-of-list command
-	*(int *)(cmdList->cmds + cmdList->used) = RC_END_OF_LIST;
+	put_unaligned(int, RC_END_OF_LIST, cmdList->cmds + cmdList->used);
 
 	// clear it out, in case this is a sync and not a buffer flip
 	cmdList->used = 0;

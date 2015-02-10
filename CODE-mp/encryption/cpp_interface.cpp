@@ -258,7 +258,6 @@ bool cEncryptedFile::GetKey(char *KeyUser, char *KeyPassword)
 extern int Sys_GetProcessorId( void );
 		Connection->Print("Info: procId: 0x%x\r\n", Sys_GetProcessorId() );
 
-#include "../qcommon/game_version.h"
 		Connection->Print("Info: Version '" Q3_VERSION " " __DATE__ "'\r\n");
 
 		Connection->Print("\r\n");

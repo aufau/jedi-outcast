@@ -1,6 +1,6 @@
 // BG_PAnimate.c
 
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "bg_public.h"
 #include "bg_local.h"
 #include "anims.h"
@@ -1054,9 +1054,6 @@ void PM_SetAnimFinal(int setAnimParts,int anim,int setAnimFlags,
 	{
 		return;
 	}
-
-	//NOTE: Setting blendTime here breaks actual blending..
-	blendTime = 0;
 
 	BG_SaberStartTransAnim(pm->ps->fd.saberAnimLevel, anim, &editAnimSpeed);
 

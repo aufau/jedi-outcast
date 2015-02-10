@@ -480,7 +480,7 @@ static void HandleEvents(void)
                 // bk001206 - handle key repeat w/o XAutRepatOn/Off
                 //            also: not done if console/menu is active.
 		// From Ryan's Fakk2.
-		// see game/q_shared.h, KEYCATCH_* . 0 == in 3d game.  
+		// see q_shared.h, KEYCATCH_* . 0 == in 3d game.  
 		  if (cls.keyCatchers == 0) {   // FIXME: KEYCATCH_NONE
                    if (repeated_press(&event) == qtrue)
                       continue;

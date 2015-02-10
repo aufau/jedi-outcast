@@ -604,7 +604,7 @@ const glyphInfo_t *CFontInfo::GetLetter(const unsigned int uiLetter, int *piShad
 }
 
 
-const int CFontInfo::GetAsianCode(ulong uiLetter) const
+int CFontInfo::GetAsianCode(ulong uiLetter) const
 {
 	int iCollapsedAsianCode = 0;
 
@@ -630,7 +630,7 @@ const int CFontInfo::GetAsianCode(ulong uiLetter) const
 }
 
 
-const int CFontInfo::GetLetterWidth(unsigned int uiLetter) const
+int CFontInfo::GetLetterWidth(unsigned int uiLetter) const
 {
 	if ( GetAsianCode(uiLetter) )
 	{
@@ -645,7 +645,7 @@ const int CFontInfo::GetLetterWidth(unsigned int uiLetter) const
 	return(mGlyphs['.'].width);
 }
 
-const int CFontInfo::GetLetterHorizAdvance(unsigned int uiLetter) const
+int CFontInfo::GetLetterHorizAdvance(unsigned int uiLetter) const
 {
 	if ( GetAsianCode(uiLetter) )
 	{

@@ -477,12 +477,10 @@ void CL_ShutdownCGame( void ) {
 #endif
 }
 
-static int	FloatAsInt( float f ) {
-	int		temp;
-
-	*(float *)&temp = f;
-
-	return temp;
+static int FloatAsInt( float f ) {
+	floatint_t fi;
+	fi.f = f;
+	return fi.i;
 }
 
 /*
@@ -492,8 +490,6 @@ CL_CgameSystemCalls
 The cgame module is making a system call
 ====================
 */
-#define	VMA(x) VM_ArgPtr(args[x])
-#define	VMF(x)	((float *)args)[x]
 extern bool RicksCrazyOnServer;
 int CL_CgameSystemCalls( int *args ) {
 	switch( args[0] ) {
@@ -776,7 +772,7 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_REAL_TIME:
 		return Com_RealTime( (struct qtime_s *)VMA(1) );
 	case CG_SNAPVECTOR:
-		Sys_SnapVector( (float *)VMA(1) );
+		Q_SnapVector( (float *)VMA(1) );
 		return 0;
 
 	case CG_CIN_PLAYCINEMATIC:

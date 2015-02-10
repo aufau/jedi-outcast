@@ -7,15 +7,15 @@
 static int (QDECL *syscall)( int arg, ... ) = (int (QDECL *)( int, ...))-1;
 
 
-void dllEntry( int (QDECL  *syscallptr)( int arg,... ) ) {
+Q_EXPORT void dllEntry( int (QDECL  *syscallptr)( int arg,... ) ) {
 	syscall = syscallptr;
 }
 
 
 int PASSFLOAT( float x ) {
-	float	floatTemp;
-	floatTemp = x;
-	return *(int *)&floatTemp;
+	floatint_t fi;
+	fi.f = x;
+	return fi.i;
 }
 
 void	trap_Print( const char *fmt ) {
@@ -24,6 +24,7 @@ void	trap_Print( const char *fmt ) {
 
 void	trap_Error( const char *fmt ) {
 	syscall( CG_ERROR, fmt );
+	q_unreachable();
 }
 
 int		trap_Milliseconds( void ) {

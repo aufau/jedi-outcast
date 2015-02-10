@@ -1,7 +1,7 @@
 // Generic PNG file loading code
 
 // this include must remain at the top of every CPP file
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 #include "../zlib/zlib.h"
 #include "png.h"

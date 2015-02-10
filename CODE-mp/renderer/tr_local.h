@@ -3,7 +3,7 @@
 #ifndef TR_LOCAL_H
 #define TR_LOCAL_H
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qfiles.h"
 #include "../qcommon/qcommon.h"
 #include "tr_public.h"
@@ -12,14 +12,6 @@
 
 #define GL_INDEX_TYPE		GL_UNSIGNED_INT
 typedef unsigned int glIndex_t;
-
-// fast float to int conversion
-#if (defined(_MSC_VER) && defined(__i386__))
-long myftol( float f );
-#else
-#define	myftol(x) ((int)(x))
-#endif
-
 
 // everything that is needed by the backend needs
 // to be double buffered to allow it to run in
@@ -1427,6 +1419,7 @@ void		GLimp_LogComment( char *comment );
 void		GLimp_SetGamma( unsigned char red[256], 
 						    unsigned char green[256],
 							unsigned char blue[256] );
+void		GLimp_Minimize( void );
 
 
 /*

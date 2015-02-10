@@ -222,7 +222,7 @@ void R_BindAnimatedImage( textureBundle_t *bundle ) {
 
 	// it is necessary to do this messy calc to make sure animations line up
 	// exactly with waveforms of the same frequency
-	index = myftol( tess.shaderTime * bundle->imageAnimationSpeed * FUNCTABLE_SIZE );
+	index = ri.ftol( tess.shaderTime * bundle->imageAnimationSpeed * FUNCTABLE_SIZE );
 	index >>= FUNCTABLE_SIZE2;
 
 	if ( index < 0 ) {
@@ -454,7 +454,7 @@ static void NewProjectDlightTexture( void )
 	float		*texCoords;
 	byte		*colors;
 	byte		clipBits[SHADER_MAX_VERTEXES];
-	MAC_STATIC	float	texCoordsArray[SHADER_MAX_VERTEXES][2];
+	float		texCoordsArray[SHADER_MAX_VERTEXES][2];
 	byte		colorArray[SHADER_MAX_VERTEXES][4];
 	unsigned	hitIndexes[SHADER_MAX_INDEXES];
 	int			numIndexes;
@@ -665,7 +665,7 @@ static void ProjectDlightTexture( void ) {
 	float	*texCoords;
 	byte	*colors;
 	byte	clipBits[SHADER_MAX_VERTEXES];
-	MAC_STATIC float	texCoordsArray[SHADER_MAX_VERTEXES][2];
+	float	texCoordsArray[SHADER_MAX_VERTEXES][2];
 	byte	colorArray[SHADER_MAX_VERTEXES][4];
 	unsigned	hitIndexes[SHADER_MAX_INDEXES];
 	int		numIndexes;
@@ -739,9 +739,9 @@ static void ProjectDlightTexture( void ) {
 			}
 			clipBits[i] = clip;
 
-			colors[0] = myftol(floatColor[0] * modulate);
-			colors[1] = myftol(floatColor[1] * modulate);
-			colors[2] = myftol(floatColor[2] * modulate);
+			colors[0] = ri.ftol(floatColor[0] * modulate);
+			colors[1] = ri.ftol(floatColor[1] * modulate);
+			colors[2] = ri.ftol(floatColor[2] * modulate);
 			colors[3] = 255;
 		}
 
@@ -876,7 +876,7 @@ static void ComputeColors( shaderStage_t *pStage, int forceRGBGen )
 				dot = 0.0f;
 			}
 
-			color[0] = color[1] = color[2] = color[3] = myftol( backEnd.currentEntity->e.shaderRGBA[0] * (1-dot) );
+			color[0] = color[1] = color[2] = color[3] = ri.ftol( backEnd.currentEntity->e.shaderRGBA[0] * (1-dot) );
 
 		}
 

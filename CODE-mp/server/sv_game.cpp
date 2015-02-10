@@ -279,12 +279,10 @@ void SV_GetUsercmd( int clientNum, usercmd_t *cmd ) {
 
 //==============================================
 
-static int	FloatAsInt( float f ) {
-	int		temp;
-
-	*(float *)&temp = f;
-
-	return temp;
+static int FloatAsInt( float f ) {
+	floatint_t fi;
+	fi.f = f;
+	return fi.i;
 }
 
 /*
@@ -294,14 +292,6 @@ SV_GameSystemCalls
 The module is making a system call
 ====================
 */
-//rcg010207 - see my comments in VM_DllSyscall(), in qcommon/vm.c ...
-#if ((defined __linux__) && (defined __powerpc__))
-#define VMA(x) ((void *) args[x])
-#else
-#define	VMA(x) VM_ArgPtr(args[x])
-#endif
-
-#define	VMF(x)	((float *)args)[x]
 
 extern bool RicksCrazyOnServer;
 
@@ -449,7 +439,7 @@ int SV_GameSystemCalls( int *args ) {
 	case G_REAL_TIME:
 		return Com_RealTime( (struct qtime_s *)VMA(1) );
 	case G_SNAPVECTOR:
-		Sys_SnapVector( (float *)VMA(1) );
+		Q_SnapVector( (float *)VMA(1) );
 		return 0;
 
 	case SP_REGISTER_SERVER_CMD:

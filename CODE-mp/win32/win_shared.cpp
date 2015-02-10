@@ -1,5 +1,5 @@
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 #include "win_local.h"
 #include <lmerr.h>
@@ -31,40 +31,6 @@ int Sys_Milliseconds (void)
 
 	return sys_curtime;
 }
-
-/*
-================
-Sys_SnapVector
-================
-*/
-void Sys_SnapVector( float *v )
-{
-	int i;
-	float f;
-
-	f = *v;
-	__asm	fld		f;
-	__asm	fistp	i;
-	*v = i;
-	v++;
-	f = *v;
-	__asm	fld		f;
-	__asm	fistp	i;
-	*v = i;
-	v++;
-	f = *v;
-	__asm	fld		f;
-	__asm	fistp	i;
-	*v = i;
-	/*
-	*v = myftol(*v);
-	v++;
-	*v = myftol(*v);
-	v++;
-	*v = myftol(*v);
-	*/
-}
-
 
 /*
 **

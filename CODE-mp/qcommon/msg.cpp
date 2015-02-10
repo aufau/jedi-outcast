@@ -1,4 +1,4 @@
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 #ifdef _DONETPROFILE_
 #include "INetProfile.h"
@@ -535,20 +535,21 @@ int	MSG_ReadDelta( msg_t *msg, int oldV, int bits ) {
 }
 
 void MSG_WriteDeltaFloat( msg_t *msg, float oldV, float newV ) {
+	floatint_t fi;
+	fi.f = newV;
 	if ( oldV == newV ) {
 		MSG_WriteBits( msg, 0, 1 );
 		return;
 	}
 	MSG_WriteBits( msg, 1, 1 );
-	MSG_WriteBits( msg, *(int *)&newV, 32 );
+	MSG_WriteBits( msg, fi.i, 32 );
 }
 
 float MSG_ReadDeltaFloat( msg_t *msg, float oldV ) {
 	if ( MSG_ReadBits( msg, 1 ) ) {
-		float	newV;
-
-		*(int *)&newV = MSG_ReadBits( msg, 32 );
-		return newV;
+		floatint_t newV;
+		newV.i = MSG_ReadBits( msg, 32 );
+		return newV.f;
 	}
 	return oldV;
 }
@@ -561,7 +562,7 @@ delta functions with keys
 =============================================================================
 */
 
-int kbitmask[32] = {
+uint32_t kbitmask[32] = {
 	0x00000001, 0x00000003, 0x00000007, 0x0000000F,
 	0x0000001F,	0x0000003F,	0x0000007F,	0x000000FF,
 	0x000001FF,	0x000003FF,	0x000007FF,	0x00000FFF,
@@ -591,20 +592,21 @@ int	MSG_ReadDeltaKey( msg_t *msg, int key, int oldV, int bits ) {
 }
 
 void MSG_WriteDeltaKeyFloat( msg_t *msg, int key, float oldV, float newV ) {
+	floatint_t fi;
+	fi.f = newV;
 	if ( oldV == newV ) {
 		MSG_WriteBits( msg, 0, 1 );
 		return;
 	}
 	MSG_WriteBits( msg, 1, 1 );
-	MSG_WriteBits( msg, (*(int *)&newV) ^ key, 32 );
+	MSG_WriteBits( msg, fi.i ^ key, 32 );
 }
 
 float MSG_ReadDeltaKeyFloat( msg_t *msg, int key, float oldV ) {
 	if ( MSG_ReadBits( msg, 1 ) ) {
-		float	newV;
-
-		*(int *)&newV = MSG_ReadBits( msg, 32 ) ^ key;
-		return newV;
+		floatint_t newV;
+		newV.i = MSG_ReadBits( msg, 32 ) ^ key;
+		return newV.f;
 	}
 	return oldV;
 }

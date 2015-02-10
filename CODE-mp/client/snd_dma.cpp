@@ -155,7 +155,7 @@ portable_samplepair_t	s_rawsamples[MAX_RAW_SAMPLES];
 *
 \**************************************************************************************************/
 
-int			s_UseOpenAL	= true;		// Determines if using Open AL or the default software mixer
+qboolean	s_UseOpenAL = qfalse;		// Determines if using Open AL or the default software mixer
 ALfloat		listener_pos[3];		// Listener Position
 ALfloat		listener_ori[6];		// Listener Orientation
 int			s_numChannels;			// Number of AL Sources == Num of Channels
@@ -329,6 +329,8 @@ void S_Init( void )
 	Cmd_AddCommand("soundinfo", S_SoundInfo_f);
 	Cmd_AddCommand("soundstop", S_StopAllSounds);
 
+	cv = Cvar_Get ("s_useOpenAL", "0", CVAR_ARCHIVE | CVAR_LATCH );
+	s_UseOpenAL = cv->integer ? qtrue : qfalse;
 
 	if (s_UseOpenAL)
 	{

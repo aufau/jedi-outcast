@@ -8,7 +8,7 @@
 #include <sys/time.h>
 #include <pwd.h>
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 
 //=============================================================================
@@ -47,29 +47,9 @@ int Sys_Milliseconds (void)
 	return curtime;
 }
 
-
-//#if 0 // bk001215 - see snapvector.nasm for replacement
-#if (defined __APPLE__) // rcg010206 - using this for PPC builds...
-long fastftol( float f ) { // bk001213 - from win32/win_shared.c
-  //static int tmp;
-  //	__asm fld f
-  //__asm fistp tmp
-  //__asm mov eax, tmp
-  return (long)f;
-}
-
-void Sys_SnapVector3( float *v ) { // bk001213 - see win32/win_shared.c
-  // bk001213 - old linux
-  v[0] = rint(v[0]);
-  v[1] = rint(v[1]);
-  v[2] = rint(v[2]);
-}
-#endif
-
-
 void	Sys_Mkdir( const char *path )
 {
-    mkdir (path, 0777);
+    mkdir (path, 0750);
 }
 
 //============================================
@@ -245,10 +225,12 @@ char *Sys_Cwd( void )
 {
 	static char cwd[MAX_OSPATH];
 
-	getcwd( cwd, sizeof( cwd ) - 1 );
-	cwd[MAX_OSPATH-1] = 0;
-
-	return cwd;
+	if (getcwd( cwd, sizeof( cwd ) - 1 )) {
+		cwd[MAX_OSPATH-1] = '\0';
+		return cwd;
+	} else {
+		return NULL;
+	}
 }
 
 void Sys_SetDefaultCDPath(const char *path)
@@ -287,11 +269,11 @@ char *Sys_DefaultHomePath(void)
             return homePath;
             
 	if ((p = getenv("HOME")) != NULL) {
-		Q_strncpyz(homePath, p, sizeof(homePath));
+		Com_sprintf(homePath, sizeof(homePath), "%s%c", p, PATH_SEP);
 #ifdef MACOS_X
-		Q_strcat(homePath, sizeof(homePath), "/Library/Application Support/Quake3");
+		Q_strcat(homePath, sizeof(homePath), "Library/Application Support/Quake3");
 #else
-		Q_strcat(homePath, sizeof(homePath), "/.jkii");
+		Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_UNIX);
 #endif
 		if (mkdir(homePath, 0777)) {
 			if (errno != EEXIST) 

@@ -13,7 +13,6 @@ USER INTERFACE MAIN
 
 #include "ui_local.h"
 #include "../qcommon/qfiles.h"
-#include "../qcommon/game_version.h"
 #include "ui_force.h"
 
 /*
@@ -33,7 +32,7 @@ void _UI_KeyEvent( int key, qboolean down );
 void _UI_MouseEvent( int dx, int dy );
 void _UI_Refresh( int realtime );
 qboolean _UI_IsFullscreen( void );
-int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  ) {
+Q_EXPORT int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  ) {
   switch ( command ) {
 	  case UI_GETAPIVERSION:
 		  return UI_API_VERSION;
@@ -3714,11 +3713,11 @@ static void UI_LoadDemos() {
 	char	*demoname;
 	int		i, len;
 
-	Com_sprintf(demoExt, sizeof(demoExt), "dm_%d", (int)trap_Cvar_VariableValue("protocol"));
+	Com_sprintf(demoExt, sizeof(demoExt), DEMOEXT "%d", (int)trap_Cvar_VariableValue("protocol"));
 
 	uiInfo.demoCount = trap_FS_GetFileList( "demos", demoExt, demolist, 4096 );
 
-	Com_sprintf(demoExt, sizeof(demoExt), ".dm_%d", (int)trap_Cvar_VariableValue("protocol"));
+	Com_sprintf(demoExt, sizeof(demoExt), "." DEMOEXT "%d", (int)trap_Cvar_VariableValue("protocol"));
 
 	if (uiInfo.demoCount) {
 		if (uiInfo.demoCount > MAX_DEMOS) {
@@ -5486,6 +5485,7 @@ static const char *UI_SelectedTeamHead(int index, int *actual) {
 	char *teamname;
 	int i,c=0;
 
+	*actual = 0;
 	switch(uiSkinColor)
 	{
 		case TEAM_BLUE:

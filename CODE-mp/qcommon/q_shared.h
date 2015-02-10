@@ -6,9 +6,57 @@
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 
-#define MAX_TEAMNAME 32
+#define PRODUCT_NAME			"JK2MP"
+#define BASEGAME			"base"
+#define CLIENT_WINDOW_TITLE		"Jedi Outcast MP"
+#define HOMEPATH_NAME_UNIX		".jkii"
+#define HOMEPATH_NAME_WIN
+#define HOMEPATH_NAME_MACOSX
+// Heartbeat for dpmaster protocol. You shouldn't change this unless you know what you're doing
+#define HEARTBEAT_FOR_MASTER		"QuakeArena-1"
 
-#include "../qcommon/disablewarnings.h"
+#ifndef PRODUCT_VERSION
+  #define PRODUCT_VERSION "1.04"
+#endif
+
+#define Q3_VERSION PRODUCT_NAME ": v" PRODUCT_VERSION
+
+#define MAX_TEAMNAME		32
+#define MAX_MASTER_SERVERS	5
+
+#define DEMOEXT "dm_"
+
+#include "disablewarnings.h"
+
+//Ignore __attribute__ on non-gcc platforms
+#ifndef __GNUC__
+#ifndef __attribute__
+#define __attribute__(x)
+#endif
+#endif
+
+#ifdef __GNUC__
+#define UNUSED_VAR __attribute__((unused))
+#else
+#define UNUSED_VAR
+#endif
+
+#if (defined _MSC_VER)
+#define Q_EXPORT __declspec(dllexport)
+#define Q_NORETURN __declspec(noreturn)
+#define q_unreachable() abort()
+#elif (defined __SUNPRO_C)
+#define Q_EXPORT __global
+#define Q_NORETURN
+#define q_unreachable() abort()
+#elif ((__GNUC__ >= 3) && (!__EMX__) && (!sun))
+#define Q_EXPORT __attribute__((visibility("default")))
+#define Q_NORETURN __attribute__((noreturn))
+#define q_unreachable() __builtin_unreachable()
+#else
+#define Q_EXPORT
+#define Q_NORETURN
+#endif
 
 /**********************************************************************
   VM Considerations
@@ -28,7 +76,7 @@
 
 #ifdef Q3_VM
 
-#include "bg_lib.h"
+#include "../game/bg_lib.h"
 
 #define assert(exp)     ((void)0)
 
@@ -55,277 +103,7 @@
 #define max(x,y) ((x)>(y)?(x):(y))
 #endif
 
-#ifdef _WIN32
-
-//#pragma intrinsic( memset, memcpy )
-
-#endif
-
-// this is the define for determining if we have an asm version of a C function
-#if (defined _M_IX86 || defined __i386__) && !defined __sun__  && !defined __LCC__
-#define id386	1
-#else
-#define id386	0
-#endif
-
-#if (defined(powerc) || defined(powerpc) || defined(ppc) || defined(__ppc) || defined(__ppc__)) && !defined(C_ONLY)
-#define idppc	1
-#else
-#define idppc	0
-#endif
-
-// for windows fastcall option
-
-#define	QDECL
-
-short   ShortSwap (short l);
-int		LongSwap (int l);
-float	FloatSwap (const float *f);
-
-//======================= WIN32 DEFINES =================================
-
-#ifdef WIN32
-
-#define	MAC_STATIC
-
-#undef QDECL
-#define	QDECL	__cdecl
-
-// buildstring will be incorporated into the version string
-#ifdef NDEBUG
-#ifdef _M_IX86
-#define	CPUSTRING	"win-x86"
-#elif defined _M_ALPHA
-#define	CPUSTRING	"win-AXP"
-#endif
-#else
-#ifdef _M_IX86
-#define	CPUSTRING	"win-x86-debug"
-#elif defined _M_ALPHA
-#define	CPUSTRING	"win-AXP-debug"
-#endif
-#endif
-
-#define ID_INLINE __inline 
-
-static ID_INLINE short BigShort( short l) { return ShortSwap(l); }
-#define LittleShort
-static ID_INLINE int BigLong(int l) { return LongSwap(l); }
-#define LittleLong
-static ID_INLINE float BigFloat(const float *l) { FloatSwap(l); }
-#define LittleFloat
-
-#define	PATH_SEP '\\'
-
-#endif
-
-//======================= MAC OS X DEFINES =====================
-
-#if defined(MACOS_X)
-
-#define MAC_STATIC
-#define __cdecl
-#define __declspec(x)
-#define ID_INLINE inline 
-
-#ifdef __ppc__
-#define CPUSTRING	"MacOSX-ppc"
-#elif defined __i386__
-#define CPUSTRING	"MacOSX-i386"
-#else
-#define CPUSTRING	"MacOSX-other"
-#endif
-
-#define	PATH_SEP	'/'
-
-#define __rlwimi(out, in, shift, maskBegin, maskEnd) asm("rlwimi %0,%1,%2,%3,%4" : "=r" (out) : "r" (in), "i" (shift), "i" (maskBegin), "i" (maskEnd))
-#define __dcbt(addr, offset) asm("dcbt %0,%1" : : "b" (addr), "r" (offset))
-
-static inline unsigned int __lwbrx(register void *addr, register int offset) {
-    register unsigned int word;
-    
-    asm("lwbrx %0,%2,%1" : "=r" (word) : "r" (addr), "b" (offset));
-    return word;
-}
-
-static inline unsigned short __lhbrx(register void *addr, register int offset) {
-    register unsigned short halfword;
-    
-    asm("lhbrx %0,%2,%1" : "=r" (halfword) : "r" (addr), "b" (offset));
-    return halfword;
-}
-
-static inline float __fctiw(register float f) {
-    register float fi;
-    
-    asm("fctiw %0,%1" : "=f" (fi) : "f" (f));
-
-    return fi;
-}
-
-#define BigShort
-static inline short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-static inline int LittleLong (int l) { return LongSwap(l); }
-#define BigFloat
-static inline float LittleFloat (const float l) { return FloatSwap(&l); }
-
-#endif
-
-//======================= MAC DEFINES =================================
-
-#ifdef __MACOS__
-
-#include <MacTypes.h>
-#define	MAC_STATIC
-#define ID_INLINE inline 
-
-#define	CPUSTRING	"MacOS-PPC"
-
-#define	PATH_SEP ':'
-
-void Sys_PumpEvents( void );
-
-#define BigShort
-static inline short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-static inline int LittleLong (int l) { return LongSwap(l); }
-#define BigFloat
-static inline float LittleFloat (const float l) { return FloatSwap(&l); }
-
-#endif
-
-//======================= LINUX DEFINES =================================
-
-// the mac compiler can't handle >32k of locals, so we
-// just waste space and make big arrays static...
-#ifdef __linux__
-
-#define	MAC_STATIC // bk: FIXME
-#define ID_INLINE inline 
-
-#ifdef __i386__
-#define	CPUSTRING	"linux-i386"
-#elif defined(__amd64__) || defined(__x86_64__)
-#define	CPUSTRING	"linux-amd64"
-#elif defined __axp__
-#define	CPUSTRING	"linux-alpha"
-#else
-#define	CPUSTRING	"linux-other"
-#endif
-
-#define	PATH_SEP '/'
-
-// bk001205 - try
-#ifdef Q3_STATIC
-#define	GAME_HARD_LINKED
-#define	CGAME_HARD_LINKED
-#define	UI_HARD_LINKED
-#define	BOTLIB_HARD_LINKED
-#endif
-
-#if !idppc
-inline static short BigShort( short l) { return ShortSwap(l); }
-#define LittleShort
-inline static int BigLong(int l) { return LongSwap(l); }
-#define LittleLong
-inline static float BigFloat(const float *l) { return FloatSwap(l); }
-#define LittleFloat
-#else
-#define BigShort
-inline static short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-inline static int LittleLong (int l) { return LongSwap(l); }
-#define BigFloat
-inline static float LittleFloat (const float *l) { return FloatSwap(l); }
-#endif
-
-#endif
-
-//======================= OPENBSD DEFINES =================================
-
-// the mac compiler can't handle >32k of locals, so we
-// just waste space and make big arrays static...
-#ifdef __OpenBSD__
-
-#define	MAC_STATIC // bk: FIXME
-#define ID_INLINE inline 
-
-#ifdef __i386__
-#define	CPUSTRING	"openbsd-i386"
-#elif (defined(__amd64__) || defined(__x86_64__)
-#define	CPUSTRING	"openbsd-amd64"
-#elif defined __axp__
-#define	CPUSTRING	"openbsd-alpha"
-#else
-#define	CPUSTRING	"openbsd-other"
-#endif
-
-#define	PATH_SEP '/'
-
-// bk001205 - try
-#ifdef Q3_STATIC
-#define	GAME_HARD_LINKED
-#define	CGAME_HARD_LINKED
-#define	UI_HARD_LINKED
-#define	BOTLIB_HARD_LINKED
-#endif
-
-#if !idppc
-inline static short BigShort( short l) { return ShortSwap(l); }
-#define LittleShort
-inline static int BigLong(int l) { return LongSwap(l); }
-#define LittleLong
-inline static float BigFloat(const float *l) { return FloatSwap(l); }
-#define LittleFloat
-#else
-#define BigShort
-inline static short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-inline static int LittleLong (int l) { return LongSwap(l); }
-#define BigFloat
-inline static float LittleFloat (const float *l) { return FloatSwap(l); }
-#endif
-
-#endif
-
-//======================= FreeBSD DEFINES =====================
-#ifdef __FreeBSD__ // rb010123
-
-#define MAC_STATIC
-#define ID_INLINE inline 
-
-#ifdef __i386__
-#define CPUSTRING       "freebsd-i386"
-#elif defined __axp__
-#define CPUSTRING       "freebsd-alpha"
-#else
-#define CPUSTRING       "freebsd-other"
-#endif
-
-#define	PATH_SEP '/'
-
-// bk010116 - omitted Q3STATIC (see Linux above), broken target
-
-#if !idppc
-static short BigShort( short l) { return ShortSwap(l); }
-#define LittleShort
-static int BigLong(int l) { LongSwap(l); }
-#define LittleLong
-static float BigFloat(const float *l) { FloatSwap(l); }
-#define LittleFloat
-#else
-#define BigShort
-static short LittleShort(short l) { return ShortSwap(l); }
-#define BigLong
-static int LittleLong (int l) { return LongSwap(l); }
-#define BigFloat
-static float LittleFloat (const float *l) { return FloatSwap(l); }
-#endif
-
-#endif
-
-//=============================================================
+#include "q_platform.h"
 
 //=============================================================
 
@@ -337,16 +115,66 @@ typedef const char *LPCSTR;
 
 typedef enum {qfalse, qtrue}	qboolean;
 
+typedef union {
+	float f;
+	int i;
+	unsigned int ui;
+} floatint_t;
+
+/*
+   This gets optimized-out on -O1 and above for most architectures.
+   On arches without unaligned memory access (mips, powerpc) you need
+   to either live with memcpy, or write proper type-punning via
+   union. ((alias_t *)&bytes[0])->integer DOES break aliasing rules.
+*/
+
+#define cpy_unaligned(dest, src, n) memcpy(dest, src, n)
+#define put_unaligned(type, x, ptr)		\
+	type __x = x;				\
+	memcpy((ptr), &__x, sizeof(type));
+
+#if defined (_MSC_VER) && (_MSC_VER >= 1600)
+
+        #include <stdint.h>
+
+        // vsnprintf is ISO/IEC 9899:1999
+        // abstracting this to make it portable
+        // int Q_vsnprintf( char *str, size_t size, const char *format, va_list args );
+
+#elif defined (_MSC_VER)
+
+        #include <io.h>
+
+        typedef signed __int64 int64_t;
+        typedef signed __int32 int32_t;
+        typedef signed __int16 int16_t;
+        typedef signed __int8  int8_t;
+        typedef unsigned __int64 uint64_t;
+        typedef unsigned __int32 uint32_t;
+        typedef unsigned __int16 uint16_t;
+        typedef unsigned __int8  uint8_t;
+
+        // vsnprintf is ISO/IEC 9899:1999
+        // abstracting this to make it portable
+        // int Q_vsnprintf( char *str, size_t size, const char *format, va_list args );
+#else // not using MSVC
+
+        #include <stdint.h>
+
+	// #define Q_vsnprintf vsnprintf
+
+#endif
+
 typedef int		qhandle_t;
 typedef int		fxHandle_t;
 typedef int		sfxHandle_t;
 typedef int		fileHandle_t;
 typedef int		clipHandle_t;
 
-#define PAD(base, alignment)	(((base)+(alignment)-1) & ~((alignment)-1))
-#define PADLEN(base, alignment)	(PAD((base), (alignment)) - (base))
+#define PAD(base, alignment)    (((base)+(alignment)-1) & ~((alignment)-1))
+#define PADLEN(base, alignment) (PAD((base), (alignment)) - (base))
 
-#define PADP(base, alignment)	((void *) PAD((intptr_t) (base), (alignment)))
+#define PADP(base, alignment)   ((void *) PAD((intptr_t) (base), (alignment)))
 
 #define G2_COLLISION_ENABLED
 
@@ -769,6 +597,58 @@ extern	vec3_t	axisDefault[3];
 
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
+#if idx64
+  extern long qftolsse(float f);
+  extern int qvmftolsse(void);
+  extern void qsnapvectorsse(vec3_t vec);
+
+  #define Q_ftol qftolsse
+  #define Q_SnapVector qsnapvectorsse
+
+  extern int (*Q_VMftol)(void);
+#elif id386
+  extern long QDECL qftolx87(float f);
+  extern long QDECL qftolsse(float f);
+  extern int QDECL qvmftolx87(void);
+  extern int QDECL qvmftolsse(void);
+  extern void QDECL qsnapvectorx87(vec3_t vec);
+  extern void QDECL qsnapvectorsse(vec3_t vec);
+
+  extern long (QDECL *Q_ftol)(float f);
+  extern int (QDECL *Q_VMftol)(void);
+  extern void (QDECL *Q_SnapVector)(vec3_t vec);
+#else
+  // Q_ftol must expand to a function name so the pluggable renderer can take
+  // its address
+  #define Q_ftol lrintf
+  #define Q_SnapVector(vec)\
+	do\
+	{\
+		vec3_t *temp = (vec);\
+		\
+		(*temp)[0] = round((*temp)[0]);\
+		(*temp)[1] = round((*temp)[1]);\
+		(*temp)[2] = round((*temp)[2]);\
+	} while(0)
+#endif
+/*
+// if your system does not have lrintf() and round() you can try this block. Please also open a bug report at bugzilla.icculus.org
+// or write a mail to the ioq3 mailing list.
+#else
+  #define Q_ftol(v) ((long) (v))
+  #define Q_round(v) do { if((v) < 0) (v) -= 0.5f; else (v) += 0.5f; (v) = Q_ftol((v)); } while(0)
+  #define Q_SnapVector(vec) \
+	do\
+	{\
+		vec3_t *temp = (vec);\
+		\
+		Q_round((*temp)[0]);\
+		Q_round((*temp)[1]);\
+		Q_round((*temp)[2]);\
+	} while(0)
+#endif
+*/
+
 #if idppc
 
 static inline float Q_rsqrt( float number ) {
@@ -837,7 +717,6 @@ typedef struct {
 	float	v[3];
 } vec3struct_t;
 #define VectorCopy(a,b)	*(vec3struct_t *)b=*(vec3struct_t *)a;
-#define ID_INLINE static
 #endif
 #endif
 
@@ -1070,6 +949,7 @@ int		Q_stricmpn (const char *s1, const char *s2, int n);
 char	*Q_strlwr( char *s1 );
 char	*Q_strupr( char *s1 );
 char	*Q_strrchr( const char* string, int c );
+const char      *Q_stristr( const char *s, const char *find);
 
 // NON-portable (but faster) versions
 #ifdef WIN32
@@ -1134,7 +1014,7 @@ qboolean Info_Validate( const char *s );
 void Info_NextPair( const char **s, char *key, char *value );
 
 // this is only here so the functions in q_shared.c and bg_*.c can link
-void	QDECL Com_Error( int level, const char *error, ... );
+void	QDECL Q_NORETURN Com_Error( int level, const char *error, ... );
 void	QDECL Com_Printf( const char *msg, ... );
 
 
@@ -1207,7 +1087,7 @@ COLLISION DETECTION
 ==============================================================
 */
 
-#include "surfaceflags.h"			// shared with the q3map utility
+#include "../game/surfaceflags.h"			// shared with the q3map utility
 
 // plane types are used to speed some tests
 // 0-2 are axial planes
@@ -2077,7 +1957,7 @@ Ghoul2 Insert End
 //
 #define TAGDEF(blah) TAG_ ## blah
 typedef enum {
-	#include "../qcommon/tags.h"
+	#include "tags.h"
 } memtag_t;
 
 
@@ -2100,7 +1980,7 @@ String ID Tables
 
 ========================================================================
 */
-#define ENUM2STRING(arg)   #arg,arg
+#define ENUM2STRING(arg)   {#arg,arg}
 typedef struct stringID_table_s
 {
 	char	*name;
