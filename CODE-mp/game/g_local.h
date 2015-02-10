@@ -802,7 +802,7 @@ void G_RunThink (gentity_t *ent);
 void QDECL G_LogPrintf( const char *fmt, ... );
 void SendScoreboardMessageToAllClients( void );
 void QDECL G_Printf( const char *fmt, ... );
-void QDECL G_Error( const char *fmt, ... );
+void QDECL Q_NORETURN G_Error( const char *fmt, ... );
 const char *G_GetStripEdString(char *refSection, char *refName);
 
 //
@@ -1039,7 +1039,7 @@ extern	vmCvar_t	g_saberDebugPrint;
 extern	vmCvar_t	g_austrian;
 
 void	trap_Printf( const char *fmt );
-void	trap_Error( const char *fmt );
+void	Q_NORETURN trap_Error( const char *fmt );
 int		trap_Milliseconds( void );
 int		trap_Argc( void );
 void	trap_Argv( int n, char *buffer, int bufferLength );

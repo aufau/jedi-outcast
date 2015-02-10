@@ -143,7 +143,7 @@ void Sys_Printf (char *fmt, ...)
 }
 
 // bk010104 - added for abstraction
-static void Sys_Exit( int exitCode )
+static void Q_NORETURN Sys_Exit( int exitCode )
 {
 #ifndef DEDICATED
 	SDL_Quit();
@@ -158,7 +158,7 @@ static void Sys_Exit( int exitCode )
 }
 
 
-void Sys_Quit (void) {
+void Q_NORETURN Sys_Quit (void) {
   fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
   Sys_Exit(0);
 }
@@ -235,7 +235,7 @@ void Sys_Init(void)
 	Cvar_Set( "username", Sys_GetCurrentUser() );
 }
 
-void Sys_Error( const char *error, ...)
+void Q_NORETURN Sys_Error( const char *error, ...)
 { 
     va_list     argptr;
     char        string[1024];

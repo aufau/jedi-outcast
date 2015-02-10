@@ -331,7 +331,7 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Quit_f( void ) {
+void Q_NORETURN Com_Quit_f( void ) {
 	// don't try to shutdown if we are in a recursive error
         char *p = Cmd_Args( );
 	if ( !com_errorEntered ) {
