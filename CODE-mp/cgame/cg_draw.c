@@ -2775,10 +2775,12 @@ qboolean CG_WorldCoordToScreenCoordFloat(vec3_t worldCoord, float *x, float *y)
 qboolean CG_WorldCoordToScreenCoord( vec3_t worldCoord, int *x, int *y )
 {
 	float	xF, yF;
-	qboolean retVal = CG_WorldCoordToScreenCoordFloat( worldCoord, &xF, &yF );
-	*x = (int)xF;
-	*y = (int)yF;
-	return retVal;
+	if (CG_WorldCoordToScreenCoordFloat( worldCoord, &xF, &yF )) {
+		*x = (int)xF;
+		*y = (int)yF;
+		return qtrue;
+	}
+	return qfalse;
 }
 
 /*
@@ -2829,7 +2831,10 @@ void CG_SaberClashFlare( void )
 
 	v = ( 1.0f - ((float)t / maxTime )) * ((1.0f - ( len / 800.0f )) * 2.0f + 0.35f);
 
-	CG_WorldCoordToScreenCoord( g_saberFlashPos, &x, &y );
+	if ( !CG_WorldCoordToScreenCoord( g_saberFlashPos, &x, &y ) )
+	{
+		return; // dead
+	}
 
 	VectorSet( color, 0.8f, 0.8f, 0.8f );
 	trap_R_SetColor( color );
