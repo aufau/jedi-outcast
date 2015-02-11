@@ -319,11 +319,7 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 	else
 		depthBits = r_depthbits->value;
 	stencilBits = r_stencilbits->value;
-#ifdef notyet
 	samples = r_ext_multisample->value;
-#else
-	samples = 0;
-#endif
 
 	for (i = 0; i < 16; i++)
 	{
