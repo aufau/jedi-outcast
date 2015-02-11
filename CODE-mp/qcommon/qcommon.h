@@ -200,7 +200,7 @@ PROTOCOL
 #define	PROTOCOL_VERSION	16	//v1.04
 
 #define	UPDATE_SERVER_NAME		"updatejk2.ravensoft.com"
-#define MASTER_SERVER_NAME		"master.ouned.de"
+#define MASTER_SERVER_NAME		"masterjk2.ravensoft.com"
 
 #ifdef USE_CD_KEY
 #define	AUTHORIZE_SERVER_NAME	"authorizejk2.ravensoft.com"

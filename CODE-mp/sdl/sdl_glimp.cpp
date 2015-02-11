@@ -638,7 +638,8 @@ static void GLimp_InitExtensions( void )
 
 		if ( r_ext_texture_filter_anisotropic->integer )
 		{
-			ri.Printf( PRINT_ALL, "...using GL_EXT_texture_filter_anisotropic\n" );
+			qglGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, (GLfloat *)&glConfig.maxAnisotropy);
+			ri.Printf( PRINT_ALL, "...using GL_EXT_texture_filter_anisotropic (max: %.1f)\n", glConfig.maxAnisotropy );
 		}
 		else
 		{

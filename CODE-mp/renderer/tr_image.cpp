@@ -120,7 +120,9 @@ void GL_TextureMode( const char *string ) {
 
 			if(glConfig.textureFilterAnisotropicAvailable) {
 				if(r_ext_texture_filter_anisotropic->integer) {
-					qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 2.0f);
+					float aniLvl = Com_Clamp(2.0f, glConfig.maxAnisotropy,
+								 r_ext_texture_filter_anisotropic->value);
+					qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniLvl);
 				} else {
 					qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
 				}
