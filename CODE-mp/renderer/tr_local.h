@@ -1425,6 +1425,18 @@ TESSELATOR/SHADER DECLARATIONS
 */
 typedef byte color4ub_t[4];
 
+typedef union {
+	struct {
+		byte	r;
+		byte	g;
+		byte	b;
+		byte	a;
+	};
+	byte		c[4];
+	uint32_t	ui;
+	int32_t		i;
+} color4ub_u;
+
 typedef struct stageVars
 {
 	color4ub_t	colors[SHADER_MAX_VERTEXES];
