@@ -2396,7 +2396,7 @@ Ghoul2 Insert Start
 */
 
 	// do this before we copy the data to refEnts
-	if (trap_G2_HaveWeGhoul2Models(cent->ghoul2))
+	if (cent->ghoul2 && trap_G2_HaveWeGhoul2Models(cent->ghoul2))
 	{
 		trap_G2_SetGhoul2ModelIndexes(cent->ghoul2, cgs.gameModels, cgs.skins);
 	}

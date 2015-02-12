@@ -371,7 +371,7 @@ qboolean G2_SetRootSurface(CGhoul2Info_v &ghoul2, const int modelIndex, const ch
 					 (ghoul2[boltMod].mBltlist[boltNum].surfaceNumber == -1)))
 				{
 					CGhoul2Info_v *g2i = &ghoul2;
-					G2API_RemoveGhoul2Model((CGhoul2Info_v **)&g2i, i);
+					G2API_RemoveGhoul2Model(&g2i, i);
 				}
 			}
 		}
