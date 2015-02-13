@@ -100,6 +100,13 @@ typedef enum {
 	IMPACTSOUND_FLESH
 } impactSound_t;
 
+typedef enum {
+	TEAMPOWER_REGEN,
+	TEAMPOWER_HEAL,
+	TEAMPOWER_DRAIN,
+	TEAMPOWER_ABSORB
+} teamPower_t;
+
 //=================================================
 
 // player entities need to track more information
@@ -235,7 +242,7 @@ typedef struct centity_s {
 	int				trickAlphaTime;
 
 	int				teamPowerEffectTime;
-	qboolean		teamPowerType; //0 regen, 1 heal, 2 drain, 3 absorb
+	teamPower_t			teamPowerType;
 } centity_t;
 
 
