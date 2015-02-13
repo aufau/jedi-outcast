@@ -22,7 +22,7 @@ if (cpu STREQUAL "x86_64")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -g -O3 -ffast-math")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -g -Ofast")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse2 -mmmx -mfpmath=sse")
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -ggdb -O0")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")

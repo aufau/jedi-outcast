@@ -1005,11 +1005,7 @@ static int CG_CalcFov( void ) {
 			zoomFov = 80;
 
 			f = ( cg.time - cg.predictedPlayerState.zoomTime ) / ZOOM_OUT_TIME;
-			if ( f > 1.0 ) 
-			{
-				fov_x = fov_x;
-			} 
-			else 
+			if ( f <= 1.0 )
 			{
 				fov_x = cg.predictedPlayerState.zoomFov + f * ( fov_x - cg.predictedPlayerState.zoomFov );
 			}
