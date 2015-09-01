@@ -612,7 +612,7 @@ static void IN_ProcessEvents( void )
 				break;
 
 			case SDL_MOUSEMOTION:
-				if( mouseActive )
+				if( mouseActive && (e.motion.xrel || e.motion.yrel) )
 					Sys_QueEvent( 0, SE_MOUSE, e.motion.xrel, e.motion.yrel, 0, NULL );
 				break;
 
@@ -900,7 +900,6 @@ void IN_Frame( void )
 	qboolean loading;
 
 	IN_JoyMove( );
-	IN_ProcessEvents( );
 
 	// If not DISCONNECTED (main menu) or ACTIVE (in game), we're loading
 	loading = ( cls.state != CA_DISCONNECTED && cls.state != CA_ACTIVE ) ? qtrue : qfalse;
@@ -922,6 +921,8 @@ void IN_Frame( void )
 	}
 	else
 		IN_ActivateMouse( );
+
+	IN_ProcessEvents( );
 
 	// In case we had to delay actual restart of video system
 	if( ( vidRestartTime != 0 ) && ( vidRestartTime < Sys_Milliseconds( ) ) )

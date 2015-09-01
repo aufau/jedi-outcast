@@ -2294,17 +2294,12 @@ void R_SetColorMappings( void ) {
 	}
 
 	// never overbright in windowed mode
-	if ( !glConfig.isFullscreen ) 
-	{
+	if ( !glConfig.isFullscreen && tr.overbrightBits > 0 ) {
 		tr.overbrightBits = 0;
 	}
-
-	if ( tr.overbrightBits > 1 ) {
+	// ... unless negative
+	if ( tr.overbrightBits != 0 ) {
 		tr.overbrightBits = 1;
-	}
-
-	if ( tr.overbrightBits < 0 ) {
-		tr.overbrightBits = 0;
 	}
 
 	tr.identityLight = 1.0f / ( 1 << tr.overbrightBits );
