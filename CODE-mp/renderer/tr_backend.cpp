@@ -1204,20 +1204,20 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	size_t				memcount, linelen;
 	int				padwidth, avipadwidth, padlen;
 	int				avipadlen, pixlen;
-	GLint				packAlign;
 
 	cmd = (const videoFrameCommand_t *)data;
 
-	qglGetIntegerv(GL_PACK_ALIGNMENT, &packAlign);
+	qglPixelStorei(GL_PACK_ALIGNMENT, AVI_LINE_PADDING); // 4 should be good for any hw
+
 	// Convert captureBuffer to BGR with AVI_LINE_PADDING line padding.
 	pixlen = 3 + shot.alpha;
 	linelen = cmd->width * pixlen;
+
 	// Alignment stuff for glReadPixels
-	padwidth = PAD(linelen, packAlign);
+	padwidth = PAD(linelen, AVI_LINE_PADDING);
 	padlen = padwidth - linelen;
 	memcount = padwidth * cmd->height;
-
-	cBuf = (byte *)PADP(cmd->captureBuffer, packAlign);
+	cBuf = (byte *)PADP(cmd->captureBuffer, AVI_LINE_PADDING);
 
 	qglReadPixels(0, 0, cmd->width, cmd->height, shot.glMode, GL_UNSIGNED_BYTE, cBuf);
 
@@ -1235,40 +1235,44 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	if (shot.frame == 0 || !shot.blurFrames) {
 		R_GammaCorrect(cBuf, memcount);
 
-		byte *lineend, *memend;
-		byte *srcptr, *destptr;
+		if (shot.alpha || shot.swap) {
+			byte *lineend, *memend;
+			byte *srcptr, *destptr;
 
-		// AVI line padding
-		avipadwidth = PAD(linelen, AVI_LINE_PADDING);
-		avipadlen = avipadwidth - linelen;
+			// AVI line padding
+			avipadwidth = PAD(cmd->width, AVI_LINE_PADDING);
+			avipadlen = avipadwidth - cmd->width;
 
-		srcptr = cBuf;
-		destptr = cmd->encodeBuffer;
-		memend = srcptr + memcount;
+			srcptr = cBuf;
+			destptr = cmd->encodeBuffer;
+			memend = srcptr + memcount;
 
-		// swap R and B and convert line paddings
-		// This really needs a proper rewrite for auto-vectorization
-		while(srcptr < memend) {
-			lineend = srcptr + linelen;
-			while(srcptr < lineend) {
-				// Doesn't hurt thanks to branch prediction
-				if( shot.swap ) {
-					*destptr++ = srcptr[2];
-					*destptr++ = srcptr[1];
-					*destptr++ = srcptr[0];
-				} else {
-					*destptr++ = srcptr[0];
-					*destptr++ = srcptr[1];
-					*destptr++ = srcptr[2];
+			// swap R and B and convert line paddings
+			// This really needs a proper rewrite for auto-vectorization
+			while(srcptr < memend) {
+				lineend = srcptr + linelen;
+				while(srcptr < lineend) {
+					// Doesn't hurt thanks to branch prediction
+					if(shot.swap) {
+						*destptr++ = srcptr[2];
+						*destptr++ = srcptr[1];
+						*destptr++ = srcptr[0];
+					} else {
+						*destptr++ = srcptr[0];
+						*destptr++ = srcptr[1];
+						*destptr++ = srcptr[2];
+					}
+					srcptr += pixlen;
 				}
-				srcptr += pixlen;
+				Com_Memset(destptr, '\0', avipadlen);
+				destptr += avipadlen;
+				srcptr += padlen;
 			}
-			Com_Memset(destptr, '\0', avipadlen);
-			destptr += avipadlen;
-			srcptr += padlen;
-		}
 
-		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
+			ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
+		} else {
+			ri.CL_WriteAVIVideoFrame(cBuf, memcount);
+		}
 	}
 	shot.recording = qtrue; // FIXME: Move to RE_StartVideoRecording
 
