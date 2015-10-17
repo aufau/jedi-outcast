@@ -9,7 +9,7 @@ Features so far:
   fancy on the fly to avoid trashing your disk:
 
   $ cd .jkii/base/videos
-  $ mkfifo video.avi
+  $ mkfifo clip.avi
   $ ffmpeg -i clip.avi -c:v libx264 -crf 20 -pix_fmt yuv420p clip.mp4
 
   Then run the game and type:
@@ -38,7 +38,7 @@ Features so far:
   know what you are doing.
 
   Unfortunately jk2 engine cannot run at more than 1000fps, therefore
-  (r_blurFrames - r_blurOverlap) * r_aviFramerate must be less than
+  (r_blurFrames - r_blurOverlap) * cl_aviFramerate must be less than
   1000.
 
   Example: To achieve the classic cinema movie look use these
@@ -66,5 +66,5 @@ Q&A:
 Q: How do I improve quality?
 A: Start with increasing cl_aviFramerate. Nowadays youtube accepts
    videos up to 60fps. Next comes r_blurFrames. Crank it up until you
-   hit the 1000fps formula. Only then you should think of using high
-   or best r_blurQuality.
+   hit the 1000fps formula. Only then you can think of using high or
+   best r_blurQuality.
