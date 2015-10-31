@@ -394,52 +394,6 @@ static void DrawMultitextured( shaderCommands_t *input, int stage ) {
 	GL_SelectTexture( 0 );
 }
 
-inline int VectorToInt(vec3_t vec)
-{
-	int			tmp, retval;
-
-#ifdef _MSVC_VER
-	_asm
-	{
-		push	edx
-		mov		edx, [vec]
-		fld		dword ptr[edx + 0]
-		fld		dword ptr[edx + 4]
-		fld		dword ptr[edx + 8]
-
-		mov		eax, 0xff00
-
-		fistp	tmp	   
-		mov		al, byte ptr [tmp]
-		shl		eax, 16
-		
-		fistp	tmp
-		mov		ah, byte ptr [tmp]
-
-		fistp	tmp
-		mov		al, byte ptr [tmp]
-
-		mov		[retval], eax
-		pop		edx
-	}
-#else
-	asm("flds	%1;\n\t"
-	    "flds	%2;\n\t"
-	    "flds	%3;\n\t"
-	    "fistp	%4;\n\t"
-	    "movb	%4, %%al;\n\t"
-	    "shl	$16, %0;\n\t"
-	    "fistp	%4;\n\t"
-	    "movb	%4, %%ah;\n\t"
-	    "fistp	%4;\n\t"
-	    "movb	%4, %%al;\n\t"
-	    : "=a"(retval)
-	    : "m"(vec[0]), "m"(vec[1]), "m"(vec[2]), "m"(tmp), "a"(0xff00)
-	);
-#endif
-	return(retval);
-}
-
 /*
 ===================
 NewProjectDlightTexture
@@ -452,16 +406,18 @@ static void NewProjectDlightTexture( void )
 	int			i, l;
 	vec3_t		origin, projOrigin, projToVert;
 	float		*texCoords;
-	byte		*colors;
+	color4ub_u	*colors;
 	byte		clipBits[SHADER_MAX_VERTEXES];
 	float		texCoordsArray[SHADER_MAX_VERTEXES][2];
-	byte		colorArray[SHADER_MAX_VERTEXES][4];
+	color4ub_u	colorArray[SHADER_MAX_VERTEXES];
 	unsigned	hitIndexes[SHADER_MAX_INDEXES];
 	int			numIndexes;
 	float		scale;
 	float		radius;
 	vec3_t		floatColor, coefBasis2, coefBasis3;
-    float		texcoord0, texcoord1, coef = 0.0085f * 30.0f, invRadius = 1.0f;
+	float		texcoord0, texcoord1, coef = 0.0085f * 30.0f, invRadius = 1.0f;
+	color4ub_u	intcolor;
+
 
 	if ( !backEnd.refdef.num_dlights ) 
 	{
@@ -477,7 +433,7 @@ static void NewProjectDlightTexture( void )
 		}
 
 		{
-	        colors = colorArray[0];
+	        colors = colorArray;
 	        texCoords = texCoordsArray[0];
 		}
 		
@@ -490,16 +446,19 @@ static void NewProjectDlightTexture( void )
 		radius = dl->radius;
 		scale = 1.0f / radius;
 
-		int intcolor;
 		floatColor[0] = dl->color[0] * 255;
 		floatColor[1] = dl->color[1] * 255;
 		floatColor[2] = dl->color[2] * 255;
 
-		intcolor = VectorToInt(floatColor);
+		
+		intcolor.c[0] = (char)floatColor[0];
+		intcolor.c[1] = (char)floatColor[1];
+		intcolor.c[2] = (char)floatColor[2];
+		intcolor.c[3] = 0xFF;
 
 //		RB_BypassXYZCollapse(); // do the copy into tess, because something wants to read it
 
-		for ( i = 0 ; i < tess.numVertexes ; i++, texCoords += 2, colors += 4 ) 
+		for ( i = 0 ; i < tess.numVertexes ; i++, texCoords += 2, colors++ ) 
 		{
 			vec3_t	dist, dest;
 			int		clip;
@@ -544,7 +503,7 @@ static void NewProjectDlightTexture( void )
 			clipBits[i] = clip;
 			if (dl->mType == DLIGHT_PROJECTED)
 			{
-				*(int *)colors = intcolor;
+				*colors = intcolor;
 			}
 			else
 			{
@@ -575,7 +534,10 @@ static void NewProjectDlightTexture( void )
 					}
 				}
 				VectorScale(floatColor, modulate, dest);
-				*(int *)colors = VectorToInt(dest);
+				colors->c[0] = (char)dest[0];
+				colors->c[1] = (char)dest[1];
+				colors->c[2] = (char)dest[2];
+				colors->c[3] = 0xFF;
 			}
 		}
 

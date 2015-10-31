@@ -319,11 +319,7 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder)
 	else
 		depthBits = r_depthbits->value;
 	stencilBits = r_stencilbits->value;
-#ifdef notyet
 	samples = r_ext_multisample->value;
-#else
-	samples = 0;
-#endif
 
 	for (i = 0; i < 16; i++)
 	{
@@ -638,7 +634,8 @@ static void GLimp_InitExtensions( void )
 
 		if ( r_ext_texture_filter_anisotropic->integer )
 		{
-			ri.Printf( PRINT_ALL, "...using GL_EXT_texture_filter_anisotropic\n" );
+			qglGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, (GLfloat *)&glConfig.maxAnisotropy);
+			ri.Printf( PRINT_ALL, "...using GL_EXT_texture_filter_anisotropic (max: %.1f)\n", glConfig.maxAnisotropy );
 		}
 		else
 		{
@@ -728,7 +725,7 @@ static void GLimp_InitExtensions( void )
 	qglPointParameterfvEXT = NULL;
 	if ( GLimp_HaveExtension( "GL_EXT_point_parameters" ) )
 	{
-		if ( r_ext_compiled_vertex_array->integer || 1)
+		if ( r_ext_compiled_vertex_array->integer )
 		{
 			ri.Printf( PRINT_ALL, "...using GL_EXT_point_parameters\n" );
 			qglPointParameterfEXT = ( void ( APIENTRY * )( GLenum, GLfloat) ) SDL_GL_GetProcAddress( "glPointParameterfEXT" );
@@ -881,7 +878,7 @@ void GLimp_EndFrame( void )
 		}
 
 		// Is the state we want different from the current state?
-		if( !r_fullscreen->integer == fullscreen )
+		if( fullscreen == !r_fullscreen->integer )
 		{
 			Uint32 toggleFlags;
 

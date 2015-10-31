@@ -301,6 +301,7 @@ typedef struct {
 	qboolean				isFullscreen;
 	qboolean				stereoEnabled;
 	qboolean				smpActive;		// dual processor
+	float					maxAnisotropy;
 } glconfig_t;
 
 

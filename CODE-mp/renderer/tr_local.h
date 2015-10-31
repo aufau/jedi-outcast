@@ -1116,6 +1116,7 @@ extern cvar_t	*r_texturebits;			// number of desired texture bits
 										// 32 = use 32-bit textures
 										// all else = error
 extern cvar_t	*r_texturebitslm;		// number of desired lightmap texture bits
+extern cvar_t   *r_ext_multisample;
 
 extern cvar_t	*r_measureOverdraw;		// enables stencil buffer overdraw measurement
 
@@ -1430,6 +1431,18 @@ TESSELATOR/SHADER DECLARATIONS
 ====================================================================
 */
 typedef byte color4ub_t[4];
+
+typedef union {
+	struct {
+		byte	r;
+		byte	g;
+		byte	b;
+		byte	a;
+	};
+	byte		c[4];
+	uint32_t	ui;
+	int32_t		i;
+} color4ub_u;
 
 typedef struct stageVars
 {

@@ -236,7 +236,7 @@ qboolean BG_SaberInSpecialAttack( int anim )
 	return qfalse;
 }
 
-int BG_BrokenParryForAttack( int move )
+saberMoveName_t BG_BrokenParryForAttack( saberMoveName_t move )
 {
 	//Our attack was knocked away by a knockaway parry
 	//FIXME: need actual anims for this
@@ -245,30 +245,23 @@ int BG_BrokenParryForAttack( int move )
 	{
 	case Q_B:
 		return LS_V1_B_;
-		break;
 	case Q_BR:
 		return LS_V1_BR;
-		break;
 	case Q_R:
 		return LS_V1__R;
-		break;
 	case Q_TR:
 		return LS_V1_TR;
-		break;
 	case Q_T:
 		return LS_V1_T_;
-		break;
 	case Q_TL:
 		return LS_V1_TL;
-		break;
 	case Q_L:
 		return LS_V1__L;
-		break;
 	case Q_BL:
 		return LS_V1_BL;
-		break;
+	default:
+		return LS_NONE;
 	}
-	return LS_NONE;
 }
 
 int BG_BrokenParryForParry( int move )
@@ -382,34 +375,28 @@ qboolean BG_InDeathAnim( int anim )
 }
 
 //Called only where pm is valid (not all require pm, but some do):
-int PM_SaberBounceForAttack( int move )
+saberMoveName_t PM_SaberBounceForAttack( saberMoveName_t move )
 {
 	switch ( saberMoveData[move].startQuad )
 	{
 	case Q_B:
 	case Q_BR:
 		return LS_B1_BR;
-		break;
 	case Q_R:
 		return LS_B1__R;
-		break;
 	case Q_TR:
 		return LS_B1_TR;
-		break;
 	case Q_T:
 		return LS_B1_T_;
-		break;
 	case Q_TL:
 		return LS_B1_TL;
-		break;
 	case Q_L:
 		return LS_B1__L;
-		break;
 	case Q_BL:
 		return LS_B1_BL;
-		break;
+	default:
+		return LS_NONE;
 	}
-	return LS_NONE;
 }
 
 int PM_SaberDeflectionForQuad( int quad )
@@ -696,7 +683,7 @@ int PM_AnimLength( int index, animNumber_t anim )
 	{
 		return -1;
 	}
-	return pm->animations[anim].numFrames * fabs(pm->animations[anim].frameLerp);
+	return pm->animations[anim].numFrames * abs(pm->animations[anim].frameLerp);
 }
 
 void PM_DebugLegsAnim(int anim)
@@ -1080,7 +1067,7 @@ void PM_SetAnimFinal(int setAnimParts,int anim,int setAnimFlags,
 				int dur;
 				int speedDif;
 				
-				dur = (animations[anim].numFrames-1) * fabs(animations[anim].frameLerp);
+				dur = (animations[anim].numFrames-1) * abs(animations[anim].frameLerp);
 				speedDif = dur - (dur * editAnimSpeed);
 				dur += speedDif;
 				if (dur > 1)
@@ -1089,12 +1076,12 @@ void PM_SetAnimFinal(int setAnimParts,int anim,int setAnimFlags,
 				}
 				else
 				{
-					pm->ps->torsoTimer = fabs(animations[anim].frameLerp);
+					pm->ps->torsoTimer = abs(animations[anim].frameLerp);
 				}
 			}
 			else
 			{
-				pm->ps->torsoTimer = ((animations[anim].numFrames ) * fabs(animations[anim].frameLerp));
+				pm->ps->torsoTimer = (animations[anim].numFrames ) * abs(animations[anim].frameLerp);
 			}
 
 			if (pm->ps->fd.forcePowersActive & (1 << FP_RAGE))
@@ -1128,7 +1115,7 @@ setAnimLegs:
 				int dur;
 				int speedDif;
 				
-				dur = (animations[anim].numFrames-1) * fabs(animations[anim].frameLerp);
+				dur = (animations[anim].numFrames-1) * abs(animations[anim].frameLerp);
 				speedDif = dur - (dur * editAnimSpeed);
 				dur += speedDif;
 				if (dur > 1)
@@ -1137,12 +1124,12 @@ setAnimLegs:
 				}
 				else
 				{
-					pm->ps->legsTimer = fabs(animations[anim].frameLerp);
+					pm->ps->legsTimer = abs(animations[anim].frameLerp);
 				}
 			}
 			else
 			{
-				pm->ps->legsTimer = ((animations[anim].numFrames ) * fabs(animations[anim].frameLerp));
+				pm->ps->legsTimer = animations[anim].numFrames * abs(animations[anim].frameLerp);
 			}
 
 			if (pm->ps->fd.forcePowersActive & (1 << FP_RAGE))

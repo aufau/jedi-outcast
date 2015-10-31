@@ -541,7 +541,7 @@ void CG_KillCEntityInstances()
 		VectorClear(cg_entities[i].turAngles);
 		cg_entities[i].weapon = 0;
 		cg_entities[i].teamPowerEffectTime = 0;
-		cg_entities[i].teamPowerType = 0;
+		cg_entities[i].teamPowerType = TEAMPOWER_REGEN;
 
 		i++;
 	}
